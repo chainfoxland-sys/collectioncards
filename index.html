@@ -129,7 +129,7 @@
 <body>
   <h1>Коллекция Chain</h1>
   <input id="nick" placeholder="Введите ник на Twitch" />
-  <button id="btn">Показать коллекцию</button>
+  <button id="btn" onclick="getCards()">Показать коллекцию</button>
 
   <div id="loader" style="display:none;" class="loader"></div>
   <div class="progress" id="progress"></div>
@@ -158,6 +158,7 @@ async function getCards() {
 
 </body>
 </html>
+
 
 
 
