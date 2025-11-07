@@ -136,66 +136,28 @@
   <div class="cards" id="cards"></div>
 
   <script>
-    const API_BASE = "https://script.google.com/macros/s/AKfycbz_Vi3LYNbo3RyrJRgYw0bV-y6zkeXi8v-AJwe2kAssQoIK7XRbH0S4vwpiPNz_pd7b/exec";
+const API_BASE = "https://script.google.com/macros/s/AKfycbx_xsnkFljEtF-68oKwMaHBIUbR_MnexRMho2xin0CoaARv0d2wfHxxQkQfvkciZgfF/exec";
 
-    const btn = document.getElementById("btn");
-    const input = document.getElementById("nick");
-    const cardsDiv = document.getElementById("cards");
-    const progressDiv = document.getElementById("progress");
-    const loader = document.getElementById("loader");
+async function getCards() {
+  const nick = document.getElementById("nick").value.trim();
+  if (!nick) return alert("Введите ник игрока!");
 
-    btn.addEventListener("click", loadCollection);
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") loadCollection();
-    });
+  document.getElementById("loader").style.display = "block";
 
-    async function loadCollection() {
-      const nick = input.value.trim();
-      if (!nick) {
-        alert("Введите ник!");
-        return;
-      }
+  try {
+    const res = await fetch(`${API_BASE}?player=${encodeURIComponent(nick)}`);
+    const data = await res.json();
+    document.getElementById("loader").style.display = "none";
+    console.log(data);
+  } catch (err) {
+    document.getElementById("loader").style.display = "none";
+    alert("Ошибка запроса: " + err.message);
+  }
+}
+</script>
 
-      cardsDiv.innerHTML = "";
-      progressDiv.textContent = "";
-      loader.style.display = "block";
-
-      try {
-        const res = await fetch(`${API_BASE}?player=${encodeURIComponent(nick)}`);
-        const data = await res.json();
-        loader.style.display = "none";
-
-        if (data.error) {
-          progressDiv.textContent = "Ошибка: " + (data.message || "пользователь не найден");
-          return;
-        }
-
-        progressDiv.textContent = `Уникальных: ${data.ownedUniqueCards}/${data.totalUniqueCards} (${data.progressPercent}%)`;
-
-        data.cards
-          .filter(c => c.owned > 0)
-          .forEach(c => {
-            const div = document.createElement("div");
-            div.className = "card " + (c.rarity ? c.rarity.toLowerCase() : "common");
-            div.innerHTML = `
-              <img src="${c.image}" alt="${c.name}">
-              <h3>${c.name}</h3>
-              <p>${c.rarity} • Кол-во: ${c.owned}</p>
-            `;
-            cardsDiv.appendChild(div);
-          });
-
-        if (!cardsDiv.children.length) {
-          progressDiv.textContent = "У этого игрока пока нет карт.";
-        }
-
-      } catch (err) {
-        loader.style.display = "none";
-        progressDiv.textContent = "Ошибка подключения: " + err.message;
-      }
-    }
-  </script>
 </body>
 </html>
+
 
 
