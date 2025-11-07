@@ -136,28 +136,58 @@
   <div class="cards" id="cards"></div>
 
   <script>
-const API_BASE = "https://script.google.com/macros/s/AKfycbxOGbRHLi6731xTPVI0c5e3dJnNNRoYXD8NcjLTWtnk_znQ-wKQRNLIVd0RaWNfVyQs/exec";
+const API_BASE = "https://script.google.com/macros/s/AKfycbzid1eoyu3eJs_hncJ9hyED3q9FQgNgffOiAqa8fBIYZHEIzDHMjRyQZyHASUPse8WH/exec";
+
+document.getElementById("btn").addEventListener("click", getCards);
 
 async function getCards() {
   const nick = document.getElementById("nick").value.trim();
-  if (!nick) return alert("Введите ник игрока!");
+  if (!nick) return alert("Введите ник!");
 
   document.getElementById("loader").style.display = "block";
+  document.getElementById("cards").innerHTML = "";
+  document.getElementById("progress").innerHTML = "";
 
   try {
     const res = await fetch(`${API_BASE}?player=${encodeURIComponent(nick)}`);
-    const data = await res.json();
+    const txt = await res.text();  
+    const data = JSON.parse(txt);
+
     document.getElementById("loader").style.display = "none";
-    console.log(data);
-  } catch (err) {
+
+    if (data.error) {
+      alert(data.message);
+      return;
+    }
+
+    document.getElementById("progress").innerHTML =
+      `Прогресс: ${data.owned} / ${data.total} (${data.progress}%)`;
+
+    const container = document.getElementById("cards");
+
+    data.cards.forEach(c => {
+      const div = document.createElement("div");
+      div.className = `card ${c.rarity.toLowerCase()}`;
+      div.innerHTML = `
+        <img src="${c.image}">
+        <h3>${c.name}</h3>
+        <p>${c.rarity}</p>
+        <p>${c.description}</p>
+      `;
+      container.appendChild(div);
+    });
+
+  } catch (e) {
     document.getElementById("loader").style.display = "none";
-    alert("Ошибка запроса: " + err.message);
+    alert("Ошибка: " + e.message);
   }
 }
+
 </script>
 
 </body>
 </html>
+
 
 
 
