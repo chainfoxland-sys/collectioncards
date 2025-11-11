@@ -231,7 +231,6 @@
   <div class="cards" id="cards"></div>
 
   <div class="overlay" id="overlay"></div>
-
 <script>
 const API_BASE = "https://script.google.com/macros/s/AKfycbxERXRKfigf4ydqP8rbvJBJzZMUJkkVNHnYV7PeFVo_yUDuKz37GY5XMP31E-pe8EoKFA/exec";
 
@@ -259,38 +258,39 @@ async function loadCollection() {
     const data = await res.json();
     loader.style.display = "none";
 
-    if (data.error) { progressDiv.textContent = "Ошибка: " + (data.message || "пользователь не найден"); return; }
+    if (data.error) { 
+      progressDiv.textContent = "Ошибка: " + (data.message || "пользователь не найден"); 
+      return; 
+    }
 
-    // --- Создаем карту по ID для удобного фильтра ---
-    const userCardsMap = {};
+    // --- Создаем map карт игрока для подсчета дубликатов ---
+    const playerCardsMap = {};
     data.cards.forEach(c => {
-      if (!c.name) return;
       const key = c.id || c.name;
-      if (!userCardsMap[key]) {
-        userCardsMap[key] = { ...c, count: 1, owned: true };
+      if (!playerCardsMap[key]) {
+        playerCardsMap[key] = { ...c, count: 1, owned: true };
       } else {
-        userCardsMap[key].count++;
+        playerCardsMap[key].count++;
       }
     });
 
-    // --- Получаем полный список карт для отображения всех ---
-    const allCards = data.allCards || data.cards; 
-
+    // --- Получаем все карты из API (CardID) ---
+    const allCardIds = data.allCardIds || data.cards.map(c => c.id); // если allCardIds нет, используем карты игрока
     const ownedCards = [];
     const notOwnedCards = [];
 
-    allCards.forEach(c => {
-      const key = c.id || c.name;
-      if (userCardsMap[key]) {
-        ownedCards.push(userCardsMap[key]);
+    allCardIds.forEach(id => {
+      if (playerCardsMap[id]) {
+        ownedCards.push(playerCardsMap[id]);
       } else {
-        notOwnedCards.push({ ...c, owned: false });
+        // создаем "Нет в наличии"
+        notOwnedCards.push({ id, name: "Карта #" + id, rarity: "Unknown", owned: false });
       }
     });
 
-    // --- Подсчет прогресса ---
+    // --- Прогресс ---
     const ownedUnique = ownedCards.length;
-    const totalUnique = allCards.length;
+    const totalUnique = allCardIds.length;
     const percent = totalUnique > 0 ? Math.round((ownedUnique / totalUnique) * 100) : 0;
     progressDiv.textContent = `Уникальных: ${ownedUnique}/${totalUnique} (${percent}%)`;
 
@@ -307,7 +307,7 @@ async function loadCollection() {
             <h3>${c.name}</h3>
             <p class="rarity-${rarityClass}">${c.rarity}</p>
             <p>${c.description || ""}</p>
-            ${c.count > 1 ? `<p>Дубликатов: ${c.count - 1}</p>` : ""}
+            ${c.count && c.count > 1 ? `<p>Дубликатов: ${c.count - 1}</p>` : ""}
           </div>
         `;
       } else {
@@ -320,35 +320,45 @@ async function loadCollection() {
         `;
       }
 
-      // --- Появление плавно от центра карты ---
+      // --- плавное появление карты от центра ---
       div.style.opacity = "0";
       div.style.transform = "scale(0.85)";
       div.style.transition = "transform 0.4s ease, opacity 0.4s ease";
 
-      // Задержка появления зависит от позиции на странице
       setTimeout(() => {
         div.style.opacity = "1";
         div.style.transform = "scale(1)";
-      }, (div.offsetTop + div.offsetLeft) * 0.1); // коэффициент регулирует эффект "волны"
+      }, (div.offsetTop + div.offsetLeft) * 0.05);
 
       if (c.owned) {
         div.addEventListener("click", () => {
           const expanded = div.classList.toggle("expanded");
           overlay.classList.toggle("show", expanded);
+
+          if (window.innerWidth < 768 && expanded) {
+            div.style.width = "95vw";
+            div.style.height = "auto";
+            div.style.maxHeight = "85vh";
+          }
         });
 
         overlay.addEventListener("click", () => {
           div.classList.remove("expanded");
           overlay.classList.remove("show");
+          if (window.innerWidth < 768) {
+            div.style.width = "";
+            div.style.height = "";
+            div.style.maxHeight = "";
+          }
         });
       }
 
       return div;
     }
 
-    // --- Сначала карты, которые есть у пользователя ---
+    // --- Отображаем сначала карты игрока ---
     ownedCards.forEach(c => cardsDiv.appendChild(createCard(c)));
-    // --- Потом карты, которых нет ---
+    // --- Потом карты которых нет ---
     notOwnedCards.forEach(c => cardsDiv.appendChild(createCard(c)));
 
   } catch (err) {
@@ -360,5 +370,6 @@ async function loadCollection() {
 </script>
 </body>
 </html>
+
 
 
