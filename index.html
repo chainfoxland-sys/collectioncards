@@ -270,11 +270,28 @@
         return;
       }
 
-      progressDiv.textContent =
-        `Уникальных: ${data.ownedCards}/${data.totalCards} (${data.progress}%)`;
-
-      data.cards.forEach((c, i) => {
+      // --- Фильтруем дубликаты и считаем их количество ---
+      const cardMap = {};
+      data.cards.forEach(c => {
         if (!c.name) return;
+        const key = c.id || c.name;
+        if (!cardMap[key]) {
+          cardMap[key] = { ...c, count: 1 };
+        } else {
+          cardMap[key].count++;
+        }
+      });
+
+      const uniqueCards = Object.values(cardMap);
+
+      // --- Подсчет прогресса ---
+      const ownedUnique = uniqueCards.length;
+      const totalUnique = data.totalCards || uniqueCards.length;
+      const percent = totalUnique > 0 ? Math.round((ownedUnique / totalUnique) * 100) : 0;
+
+      progressDiv.textContent = `Уникальных: ${ownedUnique}/${totalUnique} (${percent}%)`;
+
+      uniqueCards.forEach((c, i) => {
         const rarityClass = c.rarity ? c.rarity.toLowerCase() : "common";
 
         const div = document.createElement("div");
@@ -286,6 +303,7 @@
             <h3>${c.name}</h3>
             <p class="rarity-${rarityClass}">${c.rarity}</p>
             <p>${c.description || ""}</p>
+            ${c.count > 1 ? `<p>Дубликатов: ${c.count - 1}</p>` : ""}
           </div>
         `;
 
@@ -301,9 +319,12 @@
 
         cardsDiv.appendChild(div);
 
+        // --- Появление карты от позиции ---
+        const rect = div.getBoundingClientRect();
+        const delay = (rect.top + rect.left) * 0.002; // можно подкорректировать
         setTimeout(() => {
           div.classList.add("show");
-        }, 100 * i);
+        }, delay * 1000);
       });
 
       if (!cardsDiv.children.length) {
@@ -318,3 +339,4 @@
 </script>
 </body>
 </html>
+
