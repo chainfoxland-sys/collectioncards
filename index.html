@@ -165,38 +165,37 @@
 
     try {
       const res = await fetch(`${API_BASE}?player=${encodeURIComponent(nick)}`);
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
       const data = await res.json();
-      
-      console.log(data);
+      console.log(data); // смотри в консоль, если нужно отладить
 
       loader.style.display = "none";
 
       if (data.error) {
-        progressDiv.textContent =
-          "Ошибка: " + (data.message || "пользователь не найден");
+        progressDiv.textContent = "Ошибка: " + (data.message || "пользователь не найден");
         return;
       }
 
-      progressDiv.textContent =
-        `Уникальных: ${data.ownedUniqueCards}/${data.totalUniqueCards} (${data.progressPercent}%)`;
+      // ✅ исправленные названия ключей
+      progressDiv.textContent = 
+        `Уникальных: ${data.ownedCards}/${data.totalCards} (${data.progress}%)`;
 
-      data.cards
-        .filter(c => c.owned > 0)
-        .forEach(c => {
-          const div = document.createElement("div");
-          div.className = "card " + (c.rarity ? c.rarity.toLowerCase() : "common");
+      data.cards.forEach(c => {
+        const div = document.createElement("div");
+        div.className = "card " + (c.rarity ? c.rarity.toLowerCase() : "common");
 
-          div.innerHTML = `
-            <img src="${c.image}" alt="${c.name}">
-            <h3>${c.name}</h3>
-            <p>${c.rarity} • Кол-во: ${c.owned}</p>
-          `;
+        // если нет картинки, ставим заглушку
+        const imageUrl = c.image ? c.image : "https://via.placeholder.com/180x240?text=No+Image";
 
-          cardsDiv.appendChild(div);
-        });
+        div.innerHTML = `
+          <img src="${imageUrl}" alt="${c.name}">
+          <h3>${c.name}</h3>
+          <p>${c.rarity} • ${c.description || ""}</p>
+        `;
+
+        cardsDiv.appendChild(div);
+      });
 
       if (!cardsDiv.children.length) {
         progressDiv.textContent = "У этого игрока пока нет карт.";
@@ -204,7 +203,7 @@
 
     } catch (err) {
       loader.style.display = "none";
-      console.error(err); // Вывод ошибки в консоль
+      console.error(err);
       progressDiv.textContent = "Ошибка подключения: " + err.message;
     }
   }
@@ -212,4 +211,5 @@
 
 </body>
 </html>
+
 
