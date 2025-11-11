@@ -228,6 +228,7 @@ const tabs = document.getElementById("tabs");
 
 let allCards = [];
 let currentMode = "owned";
+let expandedCard = null; // Храним ссылку на раскрытую карточку
 
 /* === LOADING === */
 function setLoading(v) {
@@ -266,7 +267,19 @@ function render(mode="owned") {
     `;
 
     div.addEventListener("click", () => {
-      div.classList.toggle("expanded");
+      // Если эта карточка уже раскрыта - закрываем её
+      if (div.classList.contains("expanded")) {
+        div.classList.remove("expanded");
+        expandedCard = null;
+      } else {
+        // Закрываем предыдущую раскрытую карточку
+        if (expandedCard) {
+          expandedCard.classList.remove("expanded");
+        }
+        // Раскрываем текущую
+        div.classList.add("expanded");
+        expandedCard = div;
+      }
     });
 
     cardsDiv.appendChild(div);
@@ -284,6 +297,7 @@ async function load() {
   tabs.style.display = "none";
   cardsDiv.innerHTML = "";
   progressDiv.textContent = "Загрузка...";
+  expandedCard = null; // Сбрасываем раскрытую карточку
 
   try {
     const res = await fetch(`${API}?player=${encodeURIComponent(nick)}`);
@@ -330,6 +344,7 @@ async function load() {
     setLoading(false);
   }
 }
+
 /* === EVENTS === */
 btn.addEventListener("click", load);
 input.addEventListener("keydown", e => { if (e.key === "Enter") load(); });
@@ -339,6 +354,7 @@ document.querySelectorAll(".tab").forEach(tab => {
     document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
     tab.classList.add("active");
     currentMode = tab.dataset.tab;
+    expandedCard = null; // Сбрасываем раскрытую карточку при смене режима
     render(currentMode);
   });
 });
@@ -346,22 +362,3 @@ document.querySelectorAll(".tab").forEach(tab => {
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
