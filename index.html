@@ -139,8 +139,7 @@
 <div class="cards" id="cards"></div>
 
 <script>
-  const API_BASE =
-    "https://script.google.com/macros/s/AKfycbxiQy8cpOtvAk0TxR7nohI58BtSPUgCUJA85DYYt3OaERheMXP3FOcr2sNPbuQgyaxk7A/exec";
+  const API_BASE = "https://script.google.com/macros/s/AKfycbxERXRKfigf4ydqP8rbvJBJzZMUJkkVNHnYV7PeFVo_yUDuKz37GY5XMP31E-pe8EoKFA/exec";
 
   const btn = document.getElementById("btn");
   const input = document.getElementById("nick");
@@ -166,6 +165,9 @@
 
     try {
       const res = await fetch(`${API_BASE}?player=${encodeURIComponent(nick)}`);
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
       const data = await res.json();
 
       loader.style.display = "none";
@@ -200,6 +202,7 @@
 
     } catch (err) {
       loader.style.display = "none";
+      console.error(err); // Вывод ошибки в консоль
       progressDiv.textContent = "Ошибка подключения: " + err.message;
     }
   }
@@ -207,15 +210,3 @@
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
