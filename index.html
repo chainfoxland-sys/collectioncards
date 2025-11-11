@@ -253,7 +253,7 @@ function render(mode="owned") {
 
     div.innerHTML = `
       ${imageVisible
-        ? `<img src="${c.image}" alt="${c.name}" onerror="this.src='https://via.placeholder.com/180x240?text=No+Image'">`
+        ? `<img src="${c.image}" alt="${c.name}" onerror="this.src='https://raw.githubusercontent.com/chainfoxland-sys/collectioncards/a1ae63307c7ed92749105160bb5584659da6d59f/noimage.svg'">`
         : `<div class="no-img">Нет изображения</div>`
       }
 
@@ -340,3 +340,4 @@ document.querySelectorAll(".tab").forEach(tab => {
 
 </body>
 </html>
+
