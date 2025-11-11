@@ -315,7 +315,7 @@ async function load() {
       image: c.image || "",
       owned: c.owned == 1 || c.owned === true || c.owned === "1",
       count: c.count, // Общее количество
-      duplicates: c.count > 1 ? `+${c.count - 1}` : "" // Показываем дубликаты
+      duplicates: c.count > 1 ? `${c.count - 1}` : "" // Показываем дубликаты
     }));
 
     const ownedCount = allCards.filter(c => c.owned).length;
@@ -346,6 +346,7 @@ document.querySelectorAll(".tab").forEach(tab => {
 
 </body>
 </html>
+
 
 
 
