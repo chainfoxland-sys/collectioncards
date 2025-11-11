@@ -259,8 +259,7 @@ function render(mode="owned") {
 
       <div class="card-content">
         <h3>${c.name}</h3>
-        <p><b>${c.rarity}</b>
-        ${c.duplicates}</p>
+        <p><b>${c.rarity}</b> ${c.duplicates}</p>
         <p class="description">${c.description}</p>
       </div>
     `;
@@ -309,7 +308,7 @@ async function load() {
       description: c.description || "",
       image: c.image || "",
       owned: c.owned == 1 || c.owned === true || c.owned === "1",
-      duplicates: c.count > 1 ? c.count - 1 : 0
+      duplicates: c.count > 1 ? c.count - 1 : ""
     }));
 
     progressDiv.textContent =
@@ -341,6 +340,7 @@ document.querySelectorAll(".tab").forEach(tab => {
 
 </body>
 </html>
+
 
 
 
