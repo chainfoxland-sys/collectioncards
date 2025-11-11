@@ -253,13 +253,13 @@ function render(mode="owned") {
 
     div.innerHTML = `
       ${imageVisible
-        ? `<img src="${c.image}" alt="${c.name}" onerror="this.parentNode.innerHTML='<div class=\"no-img\">Нет изображения</div>'">`
+        ? `<img src="${c.image}" alt="${c.name}" onerror="this.src='noimage.svg'">`
         : `<div class="no-img">Нет изображения</div>`
       }
 
       <div class="card-content">
         <h3>${c.name}</h3>
-        <p><b>${c.rarity}</b> ${c.duplicates}</p>
+        <p><b>${c.rarity}</b></p>
         <p>Всего: ${c.count}</p>
         <p class="description">${c.description}</p>
       </div>
@@ -315,7 +315,7 @@ async function load() {
       image: c.image || "",
       owned: c.owned == 1 || c.owned === true || c.owned === "1",
       count: c.count, // Общее количество
-      duplicates: c.duplicates > 0 ? `+${c.duplicates}` : "" // Показываем дубликаты
+      duplicates: c.count > 1 ? `+${c.count - 1}` : "" // Показываем дубликаты
     }));
 
     const ownedCount = allCards.filter(c => c.owned).length;
@@ -346,6 +346,7 @@ document.querySelectorAll(".tab").forEach(tab => {
 
 </body>
 </html>
+
 
 
 
