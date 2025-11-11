@@ -217,7 +217,7 @@
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbxLKZBkRKb5GWESxw8-awH5ElHqBpGgCnLrwrvIMUCOCpBL_wq8dVXwoYCcMkfauX5Z/exec";
+const API = "https://script.google.com/macros/s/13sNvvhwMz4CS4WGLkwowWZcxtv55LAxp0iaUxyLII4bj3He2VGc5OmXR/exec";
 
 const btn = document.getElementById("btn");
 const input = document.getElementById("nick");
@@ -253,7 +253,7 @@ function render(mode="owned") {
 
     div.innerHTML = `
       ${imageVisible
-        ? `<img src="${c.image}" alt="${c.name}" onerror="this.src='https://raw.githubusercontent.com/chainfoxland-sys/collectioncards/a1ae63307c7ed92749105160bb5584659da6d59f/noimage.svg'">`
+        ? `<img src="${c.image}" alt="${c.name}" onerror="this.src='noimage.svg'">`
         : `<div class="no-img">Нет изображения</div>`
       }
 
@@ -341,6 +341,7 @@ document.querySelectorAll(".tab").forEach(tab => {
 
 </body>
 </html>
+
 
 
 
