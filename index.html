@@ -70,9 +70,7 @@
   <div id="overlay" class="overlay"></div>
 
 <script>
-/* ========== ПОДСТАВЬ СЮДА СВОЙ WEB APP URL (УЖЕ ВСТАВЛЕН) ========== */
 const API_BASE = "https://script.google.com/macros/s/AKfycbxLKZBkRKb5GWESxw8-awH5ElHqBpGgCnLrwrvIMUCOCpBL_wq8dVXwoYCcMkfauX5Z/exec";
-/* ================================================================ */
 
 const btn = document.getElementById("btn");
 const input = document.getElementById("nick");
@@ -85,8 +83,7 @@ const filtersBar = document.getElementById("filters");
 btn.addEventListener("click", loadCollection);
 input.addEventListener("keydown", (e) => { if (e.key === "Enter") loadCollection(); });
 
-// filters
-document.addEventListener('click', (ev) => {
+document.addEventListener("click", (ev) => {
   const chip = ev.target.closest('.chip');
   if (!chip) return;
   document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
@@ -94,9 +91,9 @@ document.addEventListener('click', (ev) => {
   applyFilter(chip.dataset.filter);
 });
 
-let lastAll = [];
 let lastOwned = [];
 let lastNotOwned = [];
+let lastAll = [];
 
 function rarityToClass(r) {
   if (!r) return "common";
@@ -110,120 +107,87 @@ function rarityToClass(r) {
 
 async function loadCollection() {
   const nick = input.value.trim();
-  if (!nick) { alert("Введите ник!"); return; }
+  if (!nick) return alert("Введите ник!");
 
-  // reset UI
   cardsDiv.innerHTML = "";
   progressDiv.textContent = "";
   loader.style.display = "block";
   filtersBar.style.display = "none";
 
   try {
-    const res = await fetch(`${API_BASE}?player=${encodeURIComponent(nick)}`);
-    loader.style.display = "none";
-    if (!res.ok) throw new Error("HTTP " + res.status);
+    const res = await fetch(API_BASE + "?player=" + encodeURIComponent(nick));
     const data = await res.json();
+    loader.style.display = "none";
 
-    if (data.error && data.message === "No player specified") {
-      progressDiv.textContent = "Ошибка API: Не указан игрок.";
+    if (data.error) {
+      progressDiv.textContent = "Ошибка: " + (data.message || "неизвестно");
       return;
     }
 
-    // if player not found, we still get allCards
-    const allCards = data.allCards || [];
-    const playerCards = data.playerCards || data.ownedCards || [];
-    const counts = data.counts || {};
+    const ownedCards = data.cards || [];
 
-    // build maps
-    const playerMap = {};
-    playerCards.forEach(c => playerMap[String(c.id)] = c);
-
-    const owned = [];
-    const notOwned = [];
-
-    allCards.forEach(card => {
-      const id = String(card.id);
-      if (playerMap[id]) {
-        const pc = playerMap[id];
-        if (!pc.count) pc.count = counts[id] || 1;
-        owned.push(pc);
-      } else {
-        notOwned.push({...card, owned:false});
-      }
-    });
-
-    // include any playerCards not present in allCards (defensive)
-    playerCards.forEach(pc => {
-      if (!allCards.find(a => String(a.id) === String(pc.id))) owned.push(pc);
-    });
-
-    lastAll = allCards;
-    lastOwned = owned;
-    lastNotOwned = notOwned;
-
-    // show filter controls when there is data
-    if (allCards.length > 0) {
-      filtersBar.style.display = "flex";
-      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-      document.getElementById('f_all').classList.add('active');
+    if (ownedCards.length === 0) {
+      progressDiv.textContent = "У этого игрока нет карт.";
+      cardsDiv.innerHTML = `<p style="font-size:1.1rem;opacity:.8;margin-top:20px;">⚠ Коллекция пуста</p>`;
+      return;
     }
 
-    const ownedUnique = owned.length;
-    const totalUnique = allCards.length || ownedUnique;
-    const percent = totalUnique > 0 ? Math.round((ownedUnique / totalUnique) * 100) : 0;
+    lastOwned = ownedCards.map(c => ({ ...c, owned: true }));
+    lastNotOwned = [];
+    lastAll = lastOwned;
+
+    filtersBar.style.display = "flex";
+    document.getElementById('f_all').classList.add('active');
+
+    const ownedUnique = ownedCards.length;
+    const totalUnique = data.totalUniqueCards || ownedUnique;
+    const percent = data.progressPercent || 0;
+
     progressDiv.textContent = `Уникальных: ${ownedUnique}/${totalUnique} (${percent}%)`;
 
-    renderCards(owned, notOwned, 'all');
+    renderCards(lastOwned, lastNotOwned, 'owned');
 
   } catch (err) {
     loader.style.display = "none";
-    console.error(err);
     progressDiv.textContent = "Ошибка: " + err.message;
   }
 }
 
 function renderCards(owned, notOwned, mode) {
   cardsDiv.innerHTML = "";
-  let items = [];
-  if (mode === 'owned') items = owned.slice();
-  else if (mode === 'notowned') items = notOwned.slice();
-  else items = owned.concat(notOwned);
 
-  let idx = 0;
-  items.forEach(c => {
-    appendCard(c, c.owned === true, idx++);
-  });
+  let items = [];
+  if (mode === 'owned') items = owned;
+  else if (mode === 'notowned') items = notOwned;
+  else items = [...owned, ...notOwned];
+
+  items.forEach((c, i) => appendCard(c, c.owned, i));
 }
 
 function appendCard(c, ownedFlag, orderIndex) {
   const rarityClass = rarityToClass(c.rarity);
   const wrap = document.createElement("div");
+
   wrap.className = "card " + rarityClass + (ownedFlag ? "" : " not-owned");
-  const imgSrc = c.image && c.image.length ? c.image : placeholderSVG();
+
   wrap.innerHTML = `
-    <img src="${imgSrc}" alt="${escapeHtml(c.name||c.id)}" loading="lazy">
+    <img src="${c.image}" alt="${escapeHtml(c.name)}" loading="lazy">
     <div class="card-info">
-      <h3>${escapeHtml(c.name || ("Карта #" + c.id))}</h3>
-      <p class="rarity">${escapeHtml(c.rarity || "")}${ownedFlag && c.count && c.count > 1 ? ` — <span class="duplicates">Дублей: ${c.count - 1}</span>` : ""}</p>
+      <h3>${escapeHtml(c.name)}</h3>
+      <p>${escapeHtml(c.rarity || "")}</p>
       <p style="font-size:0.85rem;color:#cfcfcf;">${escapeHtml(c.description || "")}</p>
     </div>
   `;
-  // staggered show
+
   setTimeout(() => wrap.classList.add("show"), orderIndex * 30);
 
-  // click handling: expand to center
   wrap.addEventListener("click", () => {
     const already = wrap.classList.contains("expanded");
     closeAllExpanded();
     if (!already) {
       wrap.classList.add("expanded");
       overlay.classList.add("show");
-      // prevent background scroll on mobile when expanded
       document.body.style.overflow = "hidden";
-      // focus trap: scroll to top of expanded card
-      setTimeout(() => { wrap.scrollIntoView({behavior:"smooth", block:"center"}); }, 100);
-    } else {
-      document.body.style.overflow = "";
     }
   });
 
@@ -237,32 +201,27 @@ function closeAllExpanded() {
 }
 
 overlay.addEventListener("click", closeAllExpanded);
-window.addEventListener("keydown", (e) => { if (e.key === "Escape") closeAllExpanded(); });
 
-// filter apply
 function applyFilter(filter) {
   if (filter === 'all') renderCards(lastOwned, lastNotOwned, 'all');
-  else if (filter === 'owned') renderCards(lastOwned, lastNotOwned, 'owned');
-  else if (filter === 'notowned') renderCards(lastOwned, lastNotOwned, 'notowned');
-  else if (filter === 'legendary') {
-    const legendOwned = lastOwned.filter(c => rarityToClass(c.rarity) === 'legendary');
-    const legendNot = lastNotOwned.filter(c => rarityToClass(c.rarity) === 'legendary');
-    renderCards(legendOwned, legendNot, 'all');
+  if (filter === 'owned') renderCards(lastOwned, lastNotOwned, 'owned');
+  if (filter === 'notowned') renderCards(lastOwned, lastNotOwned, 'notowned');
+  if (filter === 'legendary') {
+    const o = lastOwned.filter(c => rarityToClass(c.rarity) === "legendary");
+    const n = lastNotOwned.filter(c => rarityToClass(c.rarity) === "legendary");
+    renderCards(o, n, 'all');
   }
 }
 
-// helpers
-function escapeHtml(unsafe) {
-  if (unsafe === null || unsafe === undefined) return "";
-  return String(unsafe).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
-}
-
-function placeholderSVG(){
-  return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='400'%3E%3Crect width='600' height='400' fill='%2324243e'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23aaa' font-size='20'%3ENo+image%3C/text%3E%3C/svg%3E";
+function escapeHtml(x) {
+  return String(x || "").replace(/[&<>"']/g, s => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
+  }[s]));
 }
 </script>
 </body>
 </html>
+
 
 
 
