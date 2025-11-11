@@ -233,70 +233,74 @@
   <div class="overlay" id="overlay"></div>
 
 <script>
-  const API_BASE = "https://script.google.com/macros/s/AKfycbxERXRKfigf4ydqP8rbvJBJzZMUJkkVNHnYV7PeFVo_yUDuKz37GY5XMP31E-pe8EoKFA/exec";
+const API_BASE = "https://script.google.com/macros/s/AKfycbxERXRKfigf4ydqP8rbvJBJzZMUJkkVNHnYV7PeFVo_yUDuKz37GY5XMP31E-pe8EoKFA/exec";
 
-  const btn = document.getElementById("btn");
-  const input = document.getElementById("nick");
-  const cardsDiv = document.getElementById("cards");
-  const progressDiv = document.getElementById("progress");
-  const loader = document.getElementById("loader");
-  const overlay = document.getElementById("overlay");
+const btn = document.getElementById("btn");
+const input = document.getElementById("nick");
+const cardsDiv = document.getElementById("cards");
+const progressDiv = document.getElementById("progress");
+const loader = document.getElementById("loader");
+const overlay = document.getElementById("overlay");
 
-  btn.addEventListener("click", loadCollection);
-  input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") loadCollection();
-  });
+btn.addEventListener("click", loadCollection);
+input.addEventListener("keydown", (e) => { if (e.key === "Enter") loadCollection(); });
 
-  async function loadCollection() {
-    const nick = input.value.trim();
-    if (!nick) {
-      alert("Введите ник!");
-      return;
-    }
+async function loadCollection() {
+  const nick = input.value.trim();
+  if (!nick) { alert("Введите ник!"); return; }
 
-    cardsDiv.innerHTML = "";
-    progressDiv.textContent = "";
-    loader.style.display = "block";
+  cardsDiv.innerHTML = "";
+  progressDiv.textContent = "";
+  loader.style.display = "block";
 
-    try {
-      const res = await fetch(`${API_BASE}?player=${encodeURIComponent(nick)}`);
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      const data = await res.json();
+  try {
+    const res = await fetch(`${API_BASE}?player=${encodeURIComponent(nick)}`);
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    const data = await res.json();
+    loader.style.display = "none";
 
-      loader.style.display = "none";
+    if (data.error) { progressDiv.textContent = "Ошибка: " + (data.message || "пользователь не найден"); return; }
 
-      if (data.error) {
-        progressDiv.textContent = "Ошибка: " + (data.message || "пользователь не найден");
-        return;
+    // --- Создаем карту по ID для удобного фильтра ---
+    const userCardsMap = {};
+    data.cards.forEach(c => {
+      if (!c.name) return;
+      const key = c.id || c.name;
+      if (!userCardsMap[key]) {
+        userCardsMap[key] = { ...c, count: 1, owned: true };
+      } else {
+        userCardsMap[key].count++;
       }
+    });
 
-      // --- Фильтруем дубликаты и считаем их количество ---
-      const cardMap = {};
-      data.cards.forEach(c => {
-        if (!c.name) return;
-        const key = c.id || c.name;
-        if (!cardMap[key]) {
-          cardMap[key] = { ...c, count: 1 };
-        } else {
-          cardMap[key].count++;
-        }
-      });
+    // --- Получаем полный список карт для отображения всех ---
+    const allCards = data.allCards || data.cards; 
 
-      const uniqueCards = Object.values(cardMap);
+    const ownedCards = [];
+    const notOwnedCards = [];
 
-      // --- Подсчет прогресса ---
-      const ownedUnique = uniqueCards.length;
-      const totalUnique = data.totalCards || uniqueCards.length;
-      const percent = totalUnique > 0 ? Math.round((ownedUnique / totalUnique) * 100) : 0;
+    allCards.forEach(c => {
+      const key = c.id || c.name;
+      if (userCardsMap[key]) {
+        ownedCards.push(userCardsMap[key]);
+      } else {
+        notOwnedCards.push({ ...c, owned: false });
+      }
+    });
 
-      progressDiv.textContent = `Уникальных: ${ownedUnique}/${totalUnique} (${percent}%)`;
+    // --- Подсчет прогресса ---
+    const ownedUnique = ownedCards.length;
+    const totalUnique = allCards.length;
+    const percent = totalUnique > 0 ? Math.round((ownedUnique / totalUnique) * 100) : 0;
+    progressDiv.textContent = `Уникальных: ${ownedUnique}/${totalUnique} (${percent}%)`;
 
-      uniqueCards.forEach((c, i) => {
-        const rarityClass = c.rarity ? c.rarity.toLowerCase() : "common";
+    // --- Функция для создания карточки ---
+    function createCard(c) {
+      const rarityClass = c.rarity ? c.rarity.toLowerCase() : "common";
+      const div = document.createElement("div");
+      div.className = "card " + rarityClass;
 
-        const div = document.createElement("div");
-        div.className = "card " + rarityClass;
-
+      if (c.owned) {
         div.innerHTML = `
           <img src="${c.image}" alt="${c.name}">
           <div class="card-info">
@@ -306,7 +310,28 @@
             ${c.count > 1 ? `<p>Дубликатов: ${c.count - 1}</p>` : ""}
           </div>
         `;
+      } else {
+        div.innerHTML = `
+          <div class="card-info">
+            <h3>${c.name}</h3>
+            <p class="rarity-${rarityClass}" style="color:#555;">${c.rarity}</p>
+            <p style="font-style:italic; font-size:0.85em; color:#888;">Нет в наличии</p>
+          </div>
+        `;
+      }
 
+      // --- Появление плавно от центра карты ---
+      div.style.opacity = "0";
+      div.style.transform = "scale(0.85)";
+      div.style.transition = "transform 0.4s ease, opacity 0.4s ease";
+
+      // Задержка появления зависит от позиции на странице
+      setTimeout(() => {
+        div.style.opacity = "1";
+        div.style.transform = "scale(1)";
+      }, (div.offsetTop + div.offsetLeft) * 0.1); // коэффициент регулирует эффект "волны"
+
+      if (c.owned) {
         div.addEventListener("click", () => {
           const expanded = div.classList.toggle("expanded");
           overlay.classList.toggle("show", expanded);
@@ -316,27 +341,24 @@
           div.classList.remove("expanded");
           overlay.classList.remove("show");
         });
-
-        cardsDiv.appendChild(div);
-
-        // --- Появление карты от позиции ---
-        const rect = div.getBoundingClientRect();
-        const delay = (rect.top + rect.left) * 0.002; // можно подкорректировать
-        setTimeout(() => {
-          div.classList.add("show");
-        }, delay * 1000);
-      });
-
-      if (!cardsDiv.children.length) {
-        progressDiv.textContent = "У этого игрока пока нет карт.";
       }
-    } catch (err) {
-      loader.style.display = "none";
-      console.error(err);
-      progressDiv.textContent = "Ошибка подключения: " + err.message;
+
+      return div;
     }
+
+    // --- Сначала карты, которые есть у пользователя ---
+    ownedCards.forEach(c => cardsDiv.appendChild(createCard(c)));
+    // --- Потом карты, которых нет ---
+    notOwnedCards.forEach(c => cardsDiv.appendChild(createCard(c)));
+
+  } catch (err) {
+    loader.style.display = "none";
+    console.error(err);
+    progressDiv.textContent = "Ошибка подключения: " + err.message;
   }
+}
 </script>
 </body>
 </html>
+
 
