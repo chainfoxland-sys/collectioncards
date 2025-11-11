@@ -300,8 +300,8 @@ async function load() {
       if (!map[key]) {
         map[key] = { 
           ...c, 
-          count: 1,
-          duplicates: 0 // Инициализируем дубликаты
+          count: c.count,
+          duplicates: c.count - 1 // Инициализируем дубликаты
         };
       } else {
         map[key].count++;
@@ -347,6 +347,7 @@ document.querySelectorAll(".tab").forEach(tab => {
 
 </body>
 </html>
+
 
 
 
