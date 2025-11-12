@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Коллекция Chain</title>
+  <title>Коллекция карт от Chain Foxland</title>
 
   <!-- Убираем favicon 404 -->
   <link rel="icon" href="data:,">
@@ -41,8 +41,9 @@
 
     h1 {
       margin: 10px 0 18px;
-      font-size: 2.1rem;
+      font-size: 2.2rem;
       text-shadow: 0 0 12px var(--accent);
+      letter-spacing: 1px; /* Добавлено из старого кода */
     }
 
     .controls {
@@ -72,28 +73,29 @@
       color: white;
       font-weight: 600;
       cursor: pointer;
-      transition: 0.25s;
+      transition: transform 0.3s, box-shadow 0.3s; /* Улучшенные переходы из старого кода */
     }
 
     button:hover:not(:disabled) {
-      transform: translateY(-3px);
-      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+      transform: scale(1.1); /* Эффект увеличения из старого кода */
+      box-shadow: 0 0 20px #b993ff; /* Свечение из старого кода */
     }
 
     .loader {
       border: 4px solid rgba(255,255,255,0.12);
       border-top: 4px solid #8a2be2;
       border-radius: 50%;
-      width: 30px;
-      height: 30px;
+      width: 40px; /* Увеличено из старого кода */
+      height: 40px; /* Увеличено из старого кода */
+      margin: 30px auto; /* Добавлено из старого кода */
       animation: spin 1s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .progress {
-      font-size: 1rem;
-      margin-top: 12px;
-      opacity: 0.9;
+      font-size: 1.1em; /* Увеличено из старого кода */
+      font-weight: 500; /* Добавлено из старого кода */
+      margin: 20px; /* Добавлено из старого кода */
     }
 
     .tabs {
@@ -122,20 +124,21 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 20px;
+      gap: 25px; /* Увеличено из старого кода */
       padding: 20px;
     }
 
     .card {
       width: 180px;
-      border-radius: 14px;
+      border-radius: 15px; /* Увеличено из старого кода */
       overflow: hidden;
       cursor: pointer;
       background: var(--glass);
-      box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1); /* Добавлено из старого кода */
       transform: scale(0.9);
       opacity: 0;
-      transition: 0.4s;
+      transition: transform 0.4s ease, box-shadow 0.4s ease; /* Улучшено из старого кода */
+      position: relative; /* Добавлено из старого кода */
     }
     .card.show {
       transform: scale(1);
@@ -147,6 +150,8 @@
       height: 240px;
       object-fit: cover;
       background: rgba(0,0,0,0.3);
+      display: block; /* Добавлено из старого кода */
+      transition: transform 0.4s ease; /* Добавлено из старого кода */
     }
 
     .no-img {
@@ -165,6 +170,16 @@
       text-align: left;
     }
 
+    .card h3 {
+      margin: 10px 0 5px; /* Добавлено из старого кода */
+      font-size: 1em; /* Добавлено из старого кода */
+    }
+
+    .card p {
+      margin-bottom: 10px; /* Добавлено из старого кода */
+      font-size: 0.9em; /* Добавлено из старого кода */
+    }
+
     /* Описание спрятано */
     .description {
       display: none;
@@ -179,11 +194,18 @@
     }
 
     .card.expanded {
-      transform: scale(1.9) !important;
+      transform: scale(2) !important; /* Увеличено из старого кода */
       z-index: 2000;
-      box-shadow: 0 0 60px rgba(0,0,0,0.8);
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.4); /* Добавлено из старого кода */
       position: relative;
     }
+
+    /* Цвет рамки по редкости - Добавлено из старого кода */
+    .common     { border: 2px solid silver; }
+    .uncommon   { border: 2px solid #3cff00; }
+    .rare       { border: 2px solid #009dff; }
+    .epic       { border: 2px solid #c63cff; }
+    .legendary  { border: 2px solid #ff9c00; }
 
     @media (max-width: 600px) {
       .card.expanded { transform: scale(1.2) !important; }
@@ -362,3 +384,4 @@ document.querySelectorAll(".tab").forEach(tab => {
 
 </body>
 </html>
+
