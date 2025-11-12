@@ -217,11 +217,11 @@
 
 <body>
 <div class="container">
-  <h1>Коллекция Chain</h1>
+  <h1>Коллекция карт от Chain Foxland</h1>
 
   <div class="controls">
-    <input id="nick" placeholder="Введите ник Twitch" />
-    <button id="btn">Показать</button>
+    <input id="nick" placeholder="Введите ник на Twitch" />
+    <button id="btn">Показать коллекцию</button>
   </div>
 
   <div style="display:flex; justify-content:center; gap:14px; align-items:center;">
@@ -318,7 +318,7 @@ async function load() {
   setLoading(true);
   tabs.style.display = "none";
   cardsDiv.innerHTML = "";
-  progressDiv.textContent = "Загрузка...";
+  progressDiv.textContent = "Лиса достаёт лапками твои карты...";
   expandedCard = null; // Сбрасываем раскрытую карточку
 
   try {
@@ -384,4 +384,5 @@ document.querySelectorAll(".tab").forEach(tab => {
 
 </body>
 </html>
+
 
