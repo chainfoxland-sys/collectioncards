@@ -391,9 +391,47 @@ document.querySelectorAll(".tab").forEach(tab => {
   });
 });
 </script>
+<script>
+// Добавляем стили для рамок редкости
+const style = document.createElement('style');
+style.textContent = `
+    .card[pdata-rarity="Common"] { border: 2px solid silver; }
+    .card[pdata-rarity="Uncommon"] { border: 2px solid #3cff00; }
+    .card[pdata-rarity="Rare"] { border: 2px solid #009dff; }
+    .card[pdata-rarity="Epic"] { border: 2px solid #c63cff; }
+    .card[pdata-rarity="Legendary"] { border: 2px solid #ff9c00; }
+    .card[pdata-rarity="Обычная"] { border: 2px solid silver; }
+    .card[pdata-rarity="Обычный"] { border: 2px solid silver; }
+    .card[pdata-rarity="Необычная"] { border: 2px solid #3cff00; }
+    .card[pdata-rarity="Необычный"] { border: 2px solid #3cff00; }
+    .card[pdata-rarity="Редкая"] { border: 2px solid #009dff; }
+    .card[pdata-rarity="Редкий"] { border: 2px solid #009dff; }
+    .card[pdata-rarity="Эпическая"] { border: 2px solid #c63cff; }
+    .card[pdata-rarity="Эпический"] { border: 2px solid #c63cff; }
+    .card[pdata-rarity="Легендарная"] { border: 2px solid #ff9c00; }
+    .card[pdata-rarity="Легендарный"] { border: 2px solid #ff9c00; }
+`;
+document.head.appendChild(style);
 
+// Перехватываем создание карточек и добавляем атрибуты
+const originalRender = render;
+render = function(mode) {
+    originalRender(mode);
+    
+    // После отрисовки добавляем атрибуты редкости
+    setTimeout(() => {
+        document.querySelectorAll('.card').forEach(card => {
+            const rarityText = card.querySelector('p')?.textContent;
+            if (rarityText) {
+                card.setAttribute('pdata-rarity', rarityText);
+            }
+        });
+    }, 100);
+};
+</script>
 </body>
 </html>
+
 
 
 
