@@ -199,24 +199,11 @@
       box-shadow: 0 0 25px rgba(255, 255, 255, 0.4); /* Добавлено из старого кода */
       position: relative;
     }
-
-        /* Автоматические цветные рамки для карточек */
-    .card:has(p:contains("Common")) { border: 2px solid silver; }
-    .card:has(p:contains("Uncommon")) { border: 2px solid #3cff00; }
-    .card:has(p:contains("Rare")) { border: 2px solid #009dff; }
-    .card:has(p:contains("Epic")) { border: 2px solid #c63cff; }
-    .card:has(p:contains("Legendary")) { border: 2px solid #ff9c00; }
-    
-    .card:has(p:contains("Обычная")) { border: 2px solid silver; }
-    .card:has(p:contains("Обычный")) { border: 2px solid silver; }
-    .card:has(p:contains("Необычная")) { border: 2px solid #3cff00; }
-    .card:has(p:contains("Необычный")) { border: 2px solid #3cff00; }
-    .card:has(p:contains("Редкая")) { border: 2px solid #009dff; }
-    .card:has(p:contains("Редкий")) { border: 2px solid #009dff; }
-    .card:has(p:contains("Эпическая")) { border: 2px solid #c63cff; }
-    .card:has(p:contains("Эпический")) { border: 2px solid #c63cff; }
-    .card:has(p:contains("Легендарная")) { border: 2px solid #ff9c00; }
-    .card:has(p:contains("Легендарный")) { border: 2px solid #ff9c00; }
+        /* Простые цветные рамки для ВСЕХ карточек */
+    .card {
+      border: 2px solid silver;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+    }
 
     @media (max-width: 600px) {
       .card.expanded { transform: scale(1.2) !important; }
@@ -392,45 +379,32 @@ document.querySelectorAll(".tab").forEach(tab => {
 });
 </script>
 <script>
-// Добавляем стили для рамок редкости
-const style = document.createElement('style');
-style.textContent = `
-    .card[pdata-rarity="Common"] { border: 2px solid silver; }
-    .card[pdata-rarity="Uncommon"] { border: 2px solid #3cff00; }
-    .card[pdata-rarity="Rare"] { border: 2px solid #009dff; }
-    .card[pdata-rarity="Epic"] { border: 2px solid #c63cff; }
-    .card[pdata-rarity="Legendary"] { border: 2px solid #ff9c00; }
-    .card[pdata-rarity="Обычная"] { border: 2px solid silver; }
-    .card[pdata-rarity="Обычный"] { border: 2px solid silver; }
-    .card[pdata-rarity="Необычная"] { border: 2px solid #3cff00; }
-    .card[pdata-rarity="Необычный"] { border: 2px solid #3cff00; }
-    .card[pdata-rarity="Редкая"] { border: 2px solid #009dff; }
-    .card[pdata-rarity="Редкий"] { border: 2px solid #009dff; }
-    .card[pdata-rarity="Эпическая"] { border: 2px solid #c63cff; }
-    .card[pdata-rarity="Эпический"] { border: 2px solid #c63cff; }
-    .card[pdata-rarity="Легендарная"] { border: 2px solid #ff9c00; }
-    .card[pdata-rarity="Легендарный"] { border: 2px solid #ff9c00; }
-`;
-document.head.appendChild(style);
-
-// Перехватываем создание карточек и добавляем атрибуты
-const originalRender = render;
-render = function(mode) {
-    originalRender(mode);
+// Простой скрипт для цветных рамок
+setInterval(() => {
+  document.querySelectorAll('.card').forEach(card => {
+    const rarityText = card.querySelector('p')?.textContent;
+    if (!rarityText) return;
     
-    // После отрисовки добавляем атрибуты редкости
-    setTimeout(() => {
-        document.querySelectorAll('.card').forEach(card => {
-            const rarityText = card.querySelector('p')?.textContent;
-            if (rarityText) {
-                card.setAttribute('pdata-rarity', rarityText);
-            }
-        });
-    }, 100);
-};
+    const colors = {
+      'Обычная': 'silver', 'Обычный': 'silver', 'Common': 'silver',
+      'Необычная': '#3cff00', 'Необычный': '#3cff00', 'Uncommon': '#3cff00',
+      'Редкая': '#009dff', 'Редкий': '#009dff', 'Rare': '#009dff',
+      'Эпическая': '#c63cff', 'Эпический': '#c63cff', 'Epic': '#c63cff',
+      'Легендарная': '#ff9c00', 'Легендарный': '#ff9c00', 'Legendary': '#ff9c00'
+    };
+    
+    for (const [key, color] of Object.entries(colors)) {
+      if (rarityText.includes(key)) {
+        card.style.border = `2px solid ${color}`;
+        break;
+      }
+    }
+  });
+}, 1000);
 </script>
 </body>
 </html>
+
 
 
 
