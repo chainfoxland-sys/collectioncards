@@ -463,15 +463,17 @@ async function load() {
       }
     });
 
-    allCards = Object.values(map).map(c => ({
-      name: c.name || "Без имени",
-      rarity: c.rarity || "Common",
-      description: c.description || "",
-      image: c.image || "",
-      owned: c.owned == 1 || c.owned === true || c.owned === "1",
-      count: c.count,
-      duplicates: c.count > 1 ? `${c.count - 1}` : ""
-    }));
+    allCards = Object.values(map)
+  .slice(0, 21) // Ограничиваем 21 картой
+  .map(c => ({
+    name: c.name || "Без имени",
+    rarity: c.rarity || "Common",
+    description: c.description || "",
+    image: c.image || "",
+    owned: c.owned == 1 || c.owned === true || c.owned === "1",
+    count: c.count,
+    duplicates: c.count > 1 ? `${c.count - 1}` : ""
+  }));
 
     const ownedCount = allCards.filter(c => c.owned).length;
     progressDiv.textContent = `Уникальных: ${ownedCount} / 21`;
@@ -537,5 +539,6 @@ setInterval(() => {
 </script>
 </body>
 </html>
+
 
 
