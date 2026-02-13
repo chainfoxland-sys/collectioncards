@@ -450,11 +450,6 @@ async function load() {
 
     const map = {};
     data.cards.forEach(c => {
-      // Проверяем, что CardID <= 21
-      if (c.CardID && parseInt(c.CardID) > 21) {
-        return; // Пропускаем карты с номером больше 21
-      }
-      
       const key = c.id || c.name;
       if (!map[key]) {
         map[key] = { 
@@ -468,12 +463,25 @@ async function load() {
       }
     });
 
-    // Фильтруем карты: оставляем только те, у которых номер <= 21
-    const filteredCards = data.cards.filter(c => {
-      // Пробуем получить номер карты из разных возможных полей
-      const cardNumber = c.number || c.cardNumber || c.id || c.num;
-      return !cardNumber || parseInt(cardNumber) <= 21;
-    });
+    // Преобразуем в массив и сразу фильтруем для счетчика
+    allCards = Object.values(map).map(c => ({
+      name: c.name || "Без имени",
+      rarity: c.rarity || "Common",
+      description: c.description || "",
+      image: c.image || "",
+      owned: c.owned == 1 || c.owned === true || c.owned === "1",
+      count: c.count,
+      duplicates: c.count > 1 ? `${c.count - 1}` : "",
+      cardId: c.CardID // Сохраняем ID для фильтрации
+    }));
+
+    // Считаем только карты с CardID <= 21
+    const ownedCount = allCards.filter(c => c.owned && (!c.cardId || parseInt(c.cardId) <= 21)).length;
+    progressDiv.textContent = `Уникальных: ${ownedCount} / 21`;
+
+    tabs.style.display = "flex";
+    render(currentMode);
+    return; // Добавляем return, чтобы не выполнять старый код дальше
     
     // Пересоздаем map только с отфильтрованными картами
     Object.keys(map).forEach(key => delete map[key]);
@@ -565,5 +573,6 @@ setInterval(() => {
 </script>
 </body>
 </html>
+
 
 
