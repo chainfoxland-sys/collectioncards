@@ -477,15 +477,13 @@ async function load() {
       const match = c.name.match(/№(\d+)/);
       if (match) {
         const cardNumber = parseInt(match[1], 10);
-        console.log(`Карта: ${c.name}, номер: ${cardNumber}, owned: ${c.owned}`);
         return c.owned && cardNumber <= 21;
       }
-      console.log(`Нет номера: ${c.name}`);
-      return false;
+      // Если нет номера, считаем как есть (для карт без номера)
+      return c.owned;
     }).length;
     
     progressDiv.textContent = `Уникальных: ${ownedCount} / 21`;
-    console.log(`Всего карт: ${allCards.length}, owned: ${ownedCount}`);
 
     tabs.style.display = "flex";
     render(currentMode);
@@ -548,4 +546,5 @@ setInterval(() => {
 </script>
 </body>
 </html>
+
 
