@@ -448,6 +448,9 @@ async function load() {
     const data = await res.json();
     if (data.error) throw new Error(data.message || "Ошибка API");
 
+    const data = await res.json();
+    if (data.error) throw new Error(data.message || "Ошибка API");
+
     const map = {};
     data.cards.forEach(c => {
       const key = c.id || c.name;
@@ -463,7 +466,6 @@ async function load() {
       }
     });
 
-    // Преобразуем в массив и сразу фильтруем для счетчика
     allCards = Object.values(map).map(c => ({
       name: c.name || "Без имени",
       rarity: c.rarity || "Common",
@@ -472,16 +474,17 @@ async function load() {
       owned: c.owned == 1 || c.owned === true || c.owned === "1",
       count: c.count,
       duplicates: c.count > 1 ? `${c.count - 1}` : "",
-      cardId: c.CardID // Сохраняем ID для фильтрации
+      cardId: c.CardID // Сохраняем ID карты
     }));
 
     // Считаем только карты с CardID <= 21
-    const ownedCount = allCards.filter(c => c.owned && (!c.cardId || parseInt(c.cardId) <= 21)).length;
+    const ownedCount = allCards.filter(c => 
+      c.owned && (!c.cardId || parseInt(c.cardId) <= 21)
+    ).length;
+    
     progressDiv.textContent = `Уникальных: ${ownedCount} / 21`;
-
     tabs.style.display = "flex";
     render(currentMode);
-    return; // Добавляем return, чтобы не выполнять старый код дальше
     
     // Пересоздаем map только с отфильтрованными картами
     Object.keys(map).forEach(key => delete map[key]);
@@ -573,6 +576,7 @@ setInterval(() => {
 </script>
 </body>
 </html>
+
 
 
 
