@@ -473,9 +473,9 @@ async function load() {
       duplicates: c.count > 1 ? `${c.count - 1}` : ""
     }));
 
-    // Посмотрим, что приходит
-    console.log("Все карты:", allCards.map(c => ({ name: c.name, owned: c.owned })));
-    
+    // Берем только первые 21 карту (если они отсортированы по номеру)
+    allCards = allCards.slice(0, 21);
+
     const ownedCount = allCards.filter(c => c.owned).length;
     progressDiv.textContent = `Уникальных: ${ownedCount} / 21`;
 
@@ -540,6 +540,7 @@ setInterval(() => {
 </script>
 </body>
 </html>
+
 
 
 
