@@ -473,40 +473,7 @@ async function load() {
       duplicates: c.count > 1 ? `${c.count - 1}` : ""
     }));
 
-    // Исправление: считаем только карты с номером до 21 включительно
-    const ownedCount = allCards.filter(c => {
-      // Извлекаем номер из названия (предполагаем формат "№1 Имя карты")
-      const match = c.name.match(/№(\d+)/);
-      if (match) {
-        const cardNumber = parseInt(match[1], 10);
-        return c.owned && cardNumber <= 21;
-      }
-      return c.owned; // Если нет номера в названии, считаем как есть
-    }).length;
-    
-    progressDiv.textContent = `Уникальных: ${ownedCount} / 21`;
-
-    tabs.style.display = "flex";
-    render(currentMode);
-
-  } catch (e) {
-    progressDiv.textContent = "Ошибка: " + e.message;
-  } finally {
-    setLoading(false);
-  }
-}
-
-    allCards = Object.values(map).map(c => ({
-      name: c.name || "Без имени",
-      rarity: c.rarity || "Common",
-      description: c.description || "",
-      image: c.image || "",
-      owned: c.owned == 1 || c.owned === true || c.owned === "1",
-      count: c.count,
-      duplicates: c.count > 1 ? `${c.count - 1}` : ""
-    }));
-
-    const ownedCount = allCards.filter(c => c.owned).length;
+    const ownedCount = allCards.filter(c => c.owned && parseInt(c.name.match(/№(\d+)/)?.[1] || "22") <= 21).length;
     progressDiv.textContent = `Уникальных: ${ownedCount} / 21`;
 
     tabs.style.display = "flex";
