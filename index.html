@@ -473,16 +473,9 @@ async function load() {
       duplicates: c.count > 1 ? `${c.count - 1}` : ""
     }));
 
-    // Оставляем только карты с номерами от 1 до 21
-    allCards = allCards.filter(c => {
-      const match = c.name.match(/№(\d+)/);
-      if (match) {
-        const cardNumber = parseInt(match[1], 10);
-        return cardNumber >= 1 && cardNumber <= 21;
-      }
-      return false; // убираем карты без номера
-    });
-
+    // Посмотрим, что приходит
+    console.log("Все карты:", allCards.map(c => ({ name: c.name, owned: c.owned })));
+    
     const ownedCount = allCards.filter(c => c.owned).length;
     progressDiv.textContent = `Уникальных: ${ownedCount} / 21`;
 
@@ -547,6 +540,7 @@ setInterval(() => {
 </script>
 </body>
 </html>
+
 
 
 
