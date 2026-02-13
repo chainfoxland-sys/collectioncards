@@ -450,6 +450,11 @@ async function load() {
 
     const map = {};
     data.cards.forEach(c => {
+      // Проверяем, что CardID <= 21
+      if (c.CardID && parseInt(c.CardID) > 21) {
+        return; // Пропускаем карты с номером больше 21
+      }
+      
       const key = c.id || c.name;
       if (!map[key]) {
         map[key] = { 
@@ -560,4 +565,5 @@ setInterval(() => {
 </script>
 </body>
 </html>
+
 
