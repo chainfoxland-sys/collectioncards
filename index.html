@@ -463,6 +463,29 @@ async function load() {
       }
     });
 
+    // Фильтруем карты: оставляем только те, у которых номер <= 21
+    const filteredCards = data.cards.filter(c => {
+      // Пробуем получить номер карты из разных возможных полей
+      const cardNumber = c.number || c.cardNumber || c.id || c.num;
+      return !cardNumber || parseInt(cardNumber) <= 21;
+    });
+    
+    // Пересоздаем map только с отфильтрованными картами
+    Object.keys(map).forEach(key => delete map[key]);
+    filteredCards.forEach(c => {
+      const key = c.id || c.name;
+      if (!map[key]) {
+        map[key] = { 
+          ...c, 
+          count: c.count,
+          duplicates: c.count - 1
+        };
+      } else {
+        map[key].count++;
+        map[key].duplicates++;
+      }
+    });
+
     allCards = Object.values(map).map(c => ({
       name: c.name || "Без имени",
       rarity: c.rarity || "Common",
@@ -537,3 +560,4 @@ setInterval(() => {
 </script>
 </body>
 </html>
+
