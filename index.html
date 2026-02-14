@@ -427,19 +427,13 @@ async function load() {
       duplicates: c.count > 1 ? `${c.count - 1}` : ""
     }));
 
-    // Для счётчика используем отфильтрованные карты (без ☆)
-    const cardsForCounter = allCards.filter(c => !c.name.includes('☆'));
-    const ownedCount = cardsForCounter.filter(c => c.owned).length;
+    // Подсчитываем уникальные карты, исключая те, у которых в названии есть ☆
+    const cardsWithoutStar = allCards.filter(c => !c.name.includes('☆'));
+    const ownedCount = cardsWithoutStar.filter(c => c.owned).length;
     progressDiv.textContent = `Уникальных: ${ownedCount} / 21`;
 
     tabs.style.display = "flex";
-    
-    // Вызываем функцию render, которая определена в коде выше
-    if (typeof render === 'function') {
-      render(currentMode);
-    } else {
-      console.error('Функция render не найдена');
-    }
+    render(currentMode);
 
   } catch (e) {
     progressDiv.textContent = "Ошибка: " + e.message;
@@ -567,6 +561,7 @@ setInterval(() => {
 </script>
 </body>
 </html>
+
 
 
 
