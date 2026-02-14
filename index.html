@@ -450,7 +450,7 @@ async function load() {
 
     const map = {};
     data.cards.forEach(c => {
-      const key = c.id || c.name;
+      const key = c.id || c.CardName;
       if (!map[key]) {
         map[key] = { 
           ...c, 
@@ -464,7 +464,7 @@ async function load() {
     });
 
     allCards = Object.values(map).map(c => ({
-      name: c.name || "Без имени",
+      name: c.CardName || "Без имени",
       rarity: c.rarity || "Common",
       description: c.description || "",
       image: c.image || "",
@@ -487,7 +487,7 @@ async function load() {
     setLoading(false);
   }
 }
-
+  
 /* === EVENTS === */
 btn.addEventListener("click", load);
 input.addEventListener("keydown", e => { if (e.key === "Enter") load(); });
@@ -539,4 +539,5 @@ setInterval(() => {
 </script>
 </body>
 </html>
+
 
