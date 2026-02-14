@@ -470,16 +470,12 @@ async function load() {
       image: c.image || "",
       owned: c.owned == 1 || c.owned === true || c.owned === "1",
       count: c.count,
-      duplicates: c.count > 1 ? `${c.count - 1}` : "",
-      cardId: c.CardID // Добавляем ID карты
+      duplicates: c.count > 1 ? `${c.count - 1}` : ""
     }));
 
-    const ownedCount = allCards.filter(c => {
-      // Если у карты нет cardId, считаем её (для старых карт)
-      if (!c.cardId) return c.owned;
-      // Иначе проверяем что номер <= 21
-      return c.owned && parseInt(c.cardId) <= 21;
-    }).length;
+    // Фильтруем карты, исключая те, у которых в названии есть символ ☆
+    const filteredCards = allCards.filter(c => !c.name.includes('☆'));
+    const ownedCount = filteredCards.filter(c => c.owned).length;
     progressDiv.textContent = `Уникальных: ${ownedCount} / 21`;
 
     tabs.style.display = "flex";
@@ -543,3 +539,4 @@ setInterval(() => {
 </script>
 </body>
 </html>
+
