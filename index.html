@@ -448,29 +448,39 @@ async function load() {
     const data = await res.json();
     if (data.error) throw new Error(data.message || "Ошибка API");
 
+    // Для отладки - посмотрим, как называются поля в первой карте
+    if (data.cards && data.cards.length > 0) {
+      console.log('Пример первой карты:', data.cards[0]);
+      console.log('Доступные поля:', Object.keys(data.cards[0]));
+    }
+
     const map = {};
     data.cards.forEach(c => {
-      const key = c.id || c.CardName;
+      // Пробуем разные возможные названия поля с именем
+      const cardName = c.CardName || c.name || c.cardName || c.NAME || c.Name || "Без имени";
+      const key = c.id || cardName;
+      
       if (!map[key]) {
         map[key] = { 
           ...c, 
-          count: c.count,
-          duplicates: c.count - 1
+          count: c.count || 1,
+          duplicates: (c.count || 1) - 1,
+          cardName: cardName // сохраняем найденное имя
         };
       } else {
-        map[key].count++;
-        map[key].duplicates++;
+        map[key].count = (map[key].count || 1) + 1;
+        map[key].duplicates = (map[key].duplicates || 0) + 1;
       }
     });
 
     allCards = Object.values(map).map(c => ({
-      name: c.CardName || "Без имени",
-      rarity: c.rarity || "Common",
-      description: c.description || "",
-      image: c.image || "",
-      owned: c.owned == 1 || c.owned === true || c.owned === "1",
-      count: c.count,
-      duplicates: c.count > 1 ? `${c.count - 1}` : ""
+      name: c.cardName || "Без имени",
+      rarity: c.rarity || c.Rarity || "Common",
+      description: c.description || c.Description || "",
+      image: c.image || c.Image || "",
+      owned: c.owned == 1 || c.owned === true || c.owned === "1" || c.count > 0,
+      count: c.count || 1,
+      duplicates: c.duplicates > 0 ? `${c.duplicates}` : ""
     }));
 
     // Фильтруем карты, исключая те, у которых в названии есть символ ☆
@@ -539,5 +549,6 @@ setInterval(() => {
 </script>
 </body>
 </html>
+
 
 
