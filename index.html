@@ -473,7 +473,7 @@ async function load() {
       duplicates: c.count > 1 ? `${c.count - 1}` : ""
     }));
 
-    // Фильтруем карты для подсчёта, исключая те, у которых в названии есть символ ☆
+    // Фильтруем карты, исключая те, у которых в названии есть символ ☆
     const filteredCards = allCards.filter(c => !c.name.includes('☆'));
     const ownedCount = filteredCards.filter(c => c.owned).length;
     progressDiv.textContent = `Уникальных: ${ownedCount} / 21`;
@@ -539,4 +539,5 @@ setInterval(() => {
 </script>
 </body>
 </html>
+
 
