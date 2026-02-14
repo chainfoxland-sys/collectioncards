@@ -450,7 +450,7 @@ async function load() {
 
     const map = {};
     data.cards.forEach(c => {
-      const key = c.id || c.CardName;
+      const key = c.id || c.name;
       if (!map[key]) {
         map[key] = { 
           ...c, 
@@ -464,7 +464,7 @@ async function load() {
     });
 
     allCards = Object.values(map).map(c => ({
-      name: c.CardName || "Без имени",
+      name: c.name || "Без имени",
       rarity: c.rarity || "Common",
       description: c.description || "",
       image: c.image || "",
@@ -539,3 +539,4 @@ setInterval(() => {
 </script>
 </body>
 </html>
+
