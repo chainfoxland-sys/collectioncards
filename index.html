@@ -433,13 +433,20 @@ async function load() {
     progressDiv.textContent = `Уникальных: ${ownedCount} / 21`;
 
     tabs.style.display = "flex";
-    render(currentMode);
+    
+    // Вызываем функцию render, которая определена в коде выше
+    if (typeof render === 'function') {
+      render(currentMode);
+    } else {
+      console.error('Функция render не найдена');
+    }
 
   } catch (e) {
     progressDiv.textContent = "Ошибка: " + e.message;
   } finally {
     setLoading(false);
   }
+}
 
 /* === LOAD DATA === */
 async function load() {
@@ -560,6 +567,7 @@ setInterval(() => {
 </script>
 </body>
 </html>
+
 
 
 
