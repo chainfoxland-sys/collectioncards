@@ -385,49 +385,61 @@ function setLoading(v) {
 }
 
 /* === RENDER === */
-function render(mode="owned") {
+async function load() {
+  const nick = input.value.trim();
+  if (!nick) return alert("Введите ник!");
+
+  setLoading(true);
+  tabs.style.display = "none";
   cardsDiv.innerHTML = "";
+  progressDiv.textContent = "Лиса достаёт лапками твои карты...";
+  expandedCard = null;
 
-  let filtered =
-    mode === "owned" ? allCards.filter(c => c.owned)
-    : mode === "missing" ? allCards.filter(c => !c.owned)
-    : allCards;
+  try {
+    const res = await fetch(`${API}?player=${encodeURIComponent(nick)}`);
+    if (!res.ok) throw new Error("Сервер вернул ошибку " + res.status);
 
-  filtered.forEach((c,i) => {
-    const div = document.createElement("div");
-    div.className = "card";
+    const data = await res.json();
+    if (data.error) throw new Error(data.message || "Ошибка API");
 
-    const imageVisible = c.owned ? (c.image && c.image.length > 4) : false;
-
-    div.innerHTML = `
-      ${imageVisible
-        ? `<img src="${c.image}" alt="${c.name}" onerror="this.src='noimage.svg'">`
-        : `<div class="no-img">Нет изображения</div>`
-      }
-      <div class="card-content">
-        <h3>${c.name}</h3>
-        <p class="rarity-text">${c.rarity}</p>
-        <p class="description">Количество: ${c.count}</p>
-        <p class="description">${c.description}</p>
-      </div>
-    `;
-
-    div.addEventListener("click", () => {
-      if (div.classList.contains("expanded")) {
-        div.classList.remove("expanded");
-        expandedCard = null;
+    const map = {};
+    data.cards.forEach(c => {
+      const key = c.id || c.name;
+      if (!map[key]) {
+        map[key] = { 
+          ...c, 
+          count: c.count,
+          duplicates: c.count - 1
+        };
       } else {
-        if (expandedCard) {
-          expandedCard.classList.remove("expanded");
-        }
-        div.classList.add("expanded");
-        expandedCard = div;
+        map[key].count++;
+        map[key].duplicates++;
       }
     });
 
-    cardsDiv.appendChild(div);
-    setTimeout(() => div.classList.add("show"), 50 * i);
-  });
+    allCards = Object.values(map).map(c => ({
+      name: c.name || "Без имени",
+      rarity: c.rarity || "Common",
+      description: c.description || "",
+      image: c.image || "",
+      owned: c.owned == 1 || c.owned === true || c.owned === "1",
+      count: c.count,
+      duplicates: c.count > 1 ? `${c.count - 1}` : ""
+    }));
+
+    // Фильтруем карты, исключая те, у которых в названии есть символ ☆
+    const filteredCards = allCards.filter(c => !c.name.includes('☆'));
+    const ownedCount = filteredCards.filter(c => c.owned).length;
+    progressDiv.textContent = `Уникальных: ${ownedCount} / 21`;
+
+    tabs.style.display = "flex";
+    render(currentMode);
+
+  } catch (e) {
+    progressDiv.textContent = "Ошибка: " + e.message;
+  } finally {
+    setLoading(false);
+  }
 }
 
 /* === LOAD DATA === */
@@ -549,6 +561,7 @@ setInterval(() => {
 </script>
 </body>
 </html>
+
 
 
 
