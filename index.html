@@ -427,9 +427,9 @@ async function load() {
       duplicates: c.count > 1 ? `${c.count - 1}` : ""
     }));
 
-    // Фильтруем карты, исключая те, у которых в названии есть символ ☆
-    const filteredCards = allCards.filter(c => !c.name.includes('☆'));
-    const ownedCount = filteredCards.filter(c => c.owned).length;
+    // Для счётчика используем отфильтрованные карты (без ☆)
+    const cardsForCounter = allCards.filter(c => !c.name.includes('☆'));
+    const ownedCount = cardsForCounter.filter(c => c.owned).length;
     progressDiv.textContent = `Уникальных: ${ownedCount} / 21`;
 
     tabs.style.display = "flex";
@@ -440,7 +440,6 @@ async function load() {
   } finally {
     setLoading(false);
   }
-}
 
 /* === LOAD DATA === */
 async function load() {
@@ -561,6 +560,7 @@ setInterval(() => {
 </script>
 </body>
 </html>
+
 
 
 
