@@ -61,19 +61,37 @@
       margin-bottom: 10px;
     }
 
-    input#nick {
-      padding: 10px 14px;
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 12px 16px;
       border-radius: 10px;
       border: none;
-      width: 220px;
       font-size: 1rem;
       outline: none;
       background: rgba(255,255,255,0.08);
       color: #fff;
+      box-sizing: border-box;
+    }
+
+    .input-field:focus {
+      box-shadow: 0 0 15px var(--accent);
+    }
+
+    .input-field::placeholder {
+      color: rgba(255,255,255,0.5);
     }
 
     button {
-      padding: 10px 18px;
+      padding: 12px 24px;
       background: linear-gradient(45deg, #7f00ff, #e100ff);
       border: none;
       border-radius: 10px;
@@ -84,8 +102,15 @@
     }
 
     button:hover:not(:disabled) {
-      transform: scale(1.1);
+      transform: scale(1.05);
       box-shadow: 0 0 20px #b993ff;
+    }
+
+    .hint {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.85rem;
+      margin-top: 5px;
+      text-align: center;
     }
 
     .loader {
@@ -108,6 +133,16 @@
       margin: 10px 20px 20px 20px;
       font-style: italic;
       text-shadow: 0 0 10px rgba(255,255,255,0.5);
+    }
+
+    .error-message {
+      background: rgba(255, 80, 80, 0.2);
+      border: 1px solid #ff6b6b;
+      border-radius: 10px;
+      padding: 12px;
+      margin: 10px auto;
+      max-width: 400px;
+      color: #ffb8b8;
     }
 
     .tabs {
@@ -301,18 +336,8 @@
         margin: 5px 0 12px;
       }
       
-      .controls {
-        gap: 6px;
-        margin-bottom: 8px;
-      }
-      
-      input#nick {
-        width: 180px;
-        padding: 8px 12px;
-      }
-      
-      button {
-        padding: 8px 16px;
+      .input-group {
+        max-width: 300px;
       }
     }
 
@@ -345,9 +370,15 @@
   <h1>Коллекционные карты от Chain Foxland</h1>
 
   <div class="controls">
-    <input id="nick" placeholder="Введите ник на Twitch" />
-    <button id="btn">Показать коллекцию</button>
+    <div class="input-group">
+      <input type="text" id="nick" class="input-field" placeholder="Ник на Twitch" autocomplete="username" />
+      <input type="password" id="password" class="input-field" placeholder="Пароль" autocomplete="current-password" />
+      <button id="btn">Войти</button>
+      <div class="hint">🔐 Пароль можно получить у администратора</div>
+    </div>
   </div>
+
+  <div id="errorMessage" class="error-message" style="display: none;"></div>
 
   <div class="loading-container">
     <div id="loader" style="display:none;" class="loader"></div>
@@ -367,21 +398,40 @@
 const API = "https://script.google.com/macros/s/AKfycbyBFVx5v1DaGYL1SAB7nyljO8V6jypXsThyet7vc4z2atGJqylxH3OW3gJNU3riIPk3/exec";
 
 const btn = document.getElementById("btn");
-const input = document.getElementById("nick");
+const nickInput = document.getElementById("nick");
+const passwordInput = document.getElementById("password");
 const loader = document.getElementById("loader");
 const progressDiv = document.getElementById("progress");
 const cardsDiv = document.getElementById("cards");
 const tabs = document.getElementById("tabs");
+const errorMessage = document.getElementById("errorMessage");
 
 let allCards = [];
 let currentMode = "owned";
 let expandedCard = null;
 
+// Пытаемся восстановить последний ник
+const savedNick = localStorage.getItem('last_nick');
+if (savedNick) {
+  nickInput.value = savedNick;
+  passwordInput.focus();
+}
+
 /* === LOADING === */
 function setLoading(v) {
   loader.style.display = v ? "block" : "none";
   btn.disabled = v;
-  input.disabled = v;
+  nickInput.disabled = v;
+  passwordInput.disabled = v;
+}
+
+/* === ПОКАЗ ОШИБКИ === */
+function showError(text) {
+  errorMessage.textContent = text;
+  errorMessage.style.display = 'block';
+  setTimeout(() => {
+    errorMessage.style.display = 'none';
+  }, 3000);
 }
 
 /* === RENDER === */
@@ -432,21 +482,39 @@ function render(mode="owned") {
 
 /* === LOAD DATA === */
 async function load() {
-  const nick = input.value.trim();
-  if (!nick) return alert("Введите ник!");
+  const nick = nickInput.value.trim();
+  const password = passwordInput.value;
+  
+  if (!nick || !password) {
+    showError("Введите ник и пароль");
+    return;
+  }
 
   setLoading(true);
   tabs.style.display = "none";
   cardsDiv.innerHTML = "";
   progressDiv.textContent = "Лиса достаёт лапками твои карты...";
+  errorMessage.style.display = 'none';
   expandedCard = null;
 
   try {
-    const res = await fetch(`${API}?player=${encodeURIComponent(nick)}`);
+    // Добавляем пароль в запрос
+    const url = `${API}?player=${encodeURIComponent(nick)}&password=${encodeURIComponent(password)}`;
+    const res = await fetch(url);
+    
     if (!res.ok) throw new Error("Сервер вернул ошибку " + res.status);
 
     const data = await res.json();
-    if (data.error) throw new Error(data.message || "Ошибка API");
+    
+    // Проверяем ошибку от API
+    if (data.error) {
+      showError("Неверный ник или пароль");
+      setLoading(false);
+      return;
+    }
+
+    // Сохраняем ник для автозаполнения
+    localStorage.setItem('last_nick', nick);
 
     const map = {};
     data.cards.forEach(c => {
@@ -482,7 +550,8 @@ async function load() {
     render(currentMode);
 
   } catch (e) {
-    progressDiv.textContent = "Ошибка: " + e.message;
+    showError("Ошибка соединения");
+    console.error(e);
   } finally {
     setLoading(false);
   }
@@ -490,7 +559,13 @@ async function load() {
 
 /* === EVENTS === */
 btn.addEventListener("click", load);
-input.addEventListener("keydown", e => { if (e.key === "Enter") load(); });
+
+// Enter в любом поле
+[nickInput, passwordInput].forEach(input => {
+  input.addEventListener("keydown", e => { 
+    if (e.key === "Enter") load(); 
+  });
+});
 
 document.querySelectorAll(".tab").forEach(tab => {
   tab.addEventListener("click", () => {
@@ -539,5 +614,3 @@ setInterval(() => {
 </script>
 </body>
 </html>
-
-
