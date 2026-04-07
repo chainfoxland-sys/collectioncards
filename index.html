@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Коллекция карт от Chain Foxland</title>
   
-  <!-- Подключаем красивый шрифт -->
   <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
   
   <link rel="icon" href="data:,">
@@ -166,7 +165,6 @@
       font-weight: 600;
     }
 
-    /* --- Карточки --- */
     .cards {
       display: flex;
       flex-wrap: wrap;
@@ -194,7 +192,6 @@
       opacity: 1;
     }
 
-    /* Анимированное свечение для карточек в наличии */
     .card.owned {
       animation: glowPulse 2s ease-in-out infinite alternate;
     }
@@ -247,14 +244,12 @@
       text-align: center;
     }
 
-    /* Цвет текста редкости */
     .rarity-text {
       font-weight: 600;
       text-shadow: 0 0 5px currentColor;
       font-family: "Exo 2", sans-serif;
     }
 
-    /* Описание спрятано */
     .description {
       display: none;
       margin-top: 8px;
@@ -265,7 +260,6 @@
       font-family: "Exo 2", sans-serif;
     }
 
-    /* Показываем при увеличении */
     .card.expanded .description {
       display: block;
     }
@@ -280,7 +274,6 @@
       box-shadow: 0 0 50px rgba(0,0,0,0.9);
     }
 
-    /* Темные фоны для разных редкостей */
     .card.common {
       background: linear-gradient(135deg, rgba(80, 80, 80, 0.9), rgba(50, 50, 50, 0.8));
     }
@@ -297,7 +290,6 @@
       background: linear-gradient(135deg, rgba(100, 50, 0, 0.9), rgba(70, 35, 0, 0.8));
     }
 
-    /* Мобильная версия */
     @media (max-width: 768px) {
       .cards {
         gap: 15px;
@@ -341,7 +333,6 @@
       }
     }
 
-    /* Для очень маленьких экранов */
     @media (max-width: 400px) {
       .card {
         width: calc(50% - 10px) !important;
@@ -354,7 +345,6 @@
       }
     }
 
-    /* Фикс для контейнера загрузки */
     .loading-container {
       display: flex;
       flex-direction: column;
@@ -395,7 +385,7 @@
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbx_AqN39ZN2iccPXi9HgyGrICJATsmVzGq8M9o-o9DHgMRXjdmt6sXkpWAeEuLGRUqv/exec";
+const API = "https://script.google.com/macros/s/AKfycbzcfzez--Fj1jrogNuvUhw5yTaNWkhchvw9fAusQv_frG88YtbJnNPs0fHnKpfuUWp3/exec";
 
 const btn = document.getElementById("btn");
 const nickInput = document.getElementById("nick");
@@ -406,35 +396,17 @@ const cardsDiv = document.getElementById("cards");
 const tabs = document.getElementById("tabs");
 const errorMessage = document.getElementById("errorMessage");
 
-let allCards = [];
+let ownedCards = [];      // Только карты игрока
+let allCardsList = [];    // Будет заполнено при первом рендере
 let currentMode = "owned";
 let expandedCard = null;
-let encryptionKey = "";
 
-// Функция расшифровки URL (только для защиты)
-function decryptUrl(encryptedBase64, key) {
-  if (!encryptedBase64 || encryptedBase64 === "") return "";
-  try {
-    const encrypted = atob(encryptedBase64);
-    let decrypted = "";
-    for (let i = 0; i < encrypted.length; i++) {
-      const charCode = encrypted.charCodeAt(i) ^ key.charCodeAt(i % key.length);
-      decrypted += String.fromCharCode(charCode);
-    }
-    return decrypted;
-  } catch (e) {
-    return "";
-  }
-}
-
-// Пытаемся восстановить последний ник
 const savedNick = localStorage.getItem('last_nick');
 if (savedNick) {
   nickInput.value = savedNick;
   passwordInput.focus();
 }
 
-/* === LOADING === */
 function setLoading(v) {
   loader.style.display = v ? "block" : "none";
   btn.disabled = v;
@@ -442,7 +414,6 @@ function setLoading(v) {
   passwordInput.disabled = v;
 }
 
-/* === ПОКАЗ ОШИБКИ === */
 function showError(text) {
   errorMessage.textContent = text;
   errorMessage.style.display = 'block';
@@ -451,37 +422,64 @@ function showError(text) {
   }, 3000);
 }
 
-/* === RENDER === */
-function render(mode="owned") {
+// Все карты (шаблон) - нужно загрузить один раз из отдельного API или вшить
+// ВАЖНО: этот список должен быть в коде или отдельном легком API
+const ALL_CARDS_TEMPLATE = [
+  // ЗДЕСЬ ВАМ НУЖНО ВПИСАТЬ ВСЕ ВОЗМОЖНЫЕ КАРТЫ (id, name, rarity, image, description)
+  // Например, возьмите из вашей таблицы Cards
+  // Или создайте отдельный публичный API, который возвращает только названия карт без ссылок
+];
+
+// Функция для получения всех карт (шаблон) из отдельного источника
+async function loadCardsTemplate() {
+  // ВАРИАНТ 1: Вшитый список (самый безопасный, но нужно обновлять код при добавлении карт)
+  // ВАРИАНТ 2: Отдельный API, который возвращает только метаданные карт (без ссылок на изображения)
+  // ВАРИАНТ 3: Загружаем с сервера, но сервер возвращает карты без изображений
+  
+  // Пока что заглушка - вернём пустой массив
+  // Вы должны заполнить ALL_CARDS_TEMPLATE вручную или через отдельный API
+  return ALL_CARDS_TEMPLATE;
+}
+
+function render(mode = "owned") {
   cardsDiv.innerHTML = "";
 
-  let filtered =
-    mode === "owned" ? allCards.filter(c => c.owned)
-    : mode === "missing" ? allCards.filter(c => !c.owned)
-    : allCards;
+  let cardsToShow = [];
+  
+  if (mode === "owned") {
+    cardsToShow = ownedCards;
+  } else if (mode === "missing") {
+    // Генерируем отсутствующие карты на основе шаблона
+    const ownedIds = new Set(ownedCards.map(c => c.id));
+    cardsToShow = allCardsList.filter(card => !ownedIds.has(card.id));
+  } else if (mode === "all") {
+    // Все карты: свои + отсутствующие
+    const ownedIds = new Set(ownedCards.map(c => c.id));
+    const missingCards = allCardsList.filter(card => !ownedIds.has(card.id));
+    cardsToShow = [...ownedCards, ...missingCards];
+  }
 
-  filtered.forEach((c,i) => {
+  if (cardsToShow.length === 0) {
+    cardsDiv.innerHTML = '<div style="color: rgba(255,255,255,0.5); padding: 40px;">Нет карт для отображения</div>';
+    return;
+  }
+
+  cardsToShow.forEach((c, i) => {
     const div = document.createElement("div");
     div.className = "card";
-
-    // ТОЛЬКО ЗДЕСЬ ЗАЩИТА - расшифровываем URL для чужих карт
-    let imageUrl = c.image;
-    if (!c.owned && c.isEncrypted && encryptionKey) {
-      imageUrl = decryptUrl(c.image, encryptionKey);
-    }
     
-    const imageVisible = c.owned ? (c.image && c.image.length > 4) : (imageUrl && imageUrl.length > 4);
+    const isOwned = ownedCards.some(oc => oc.id === c.id);
+    const imageVisible = isOwned && c.image && c.image.length > 4;
 
     div.innerHTML = `
       ${imageVisible
-        ? `<img src="${imageUrl}" alt="${c.name}" onerror="this.src='noimage.svg'">`
-        : `<div class="no-img">${!c.owned ? '🔒 Изображение скрыто' : 'Нет изображения'}</div>`
+        ? `<img src="${c.image}" alt="${c.name}" onerror="this.src='noimage.svg'">`
+        : `<div class="no-img">${!isOwned ? '🔒 Не в коллекции' : 'Нет изображения'}</div>`
       }
       <div class="card-content">
         <h3>${c.name}</h3>
         <p class="rarity-text">${c.rarity}</p>
-        <p class="description">Количество: ${c.count}</p>
-        <p class="description">${c.description}</p>
+        <p class="description">${c.description || 'Нет описания'}</p>
       </div>
     `;
 
@@ -503,7 +501,6 @@ function render(mode="owned") {
   });
 }
 
-/* === LOAD DATA === */
 async function load() {
   const nick = nickInput.value.trim();
   const password = passwordInput.value;
@@ -536,12 +533,13 @@ async function load() {
 
     localStorage.setItem('last_nick', nick);
     
-    // Сохраняем ключ для расшифровки
-    encryptionKey = data.encryptionKey || "";
-
-    allCards = data.cards || [];
+    ownedCards = data.cards || [];
     progressDiv.textContent = `Уникальных: ${data.ownedUniqueCards} / ${data.totalUniqueCards}`;
-
+    
+    // TODO: Загрузить шаблон всех карт (сейчас пустой)
+    // ВАЖНО: Вам нужно реализовать загрузку списка всех карт
+    // Самый простой способ - вшить в код массив ALL_CARDS_TEMPLATE
+    
     tabs.style.display = "flex";
     render(currentMode);
 
@@ -553,7 +551,6 @@ async function load() {
   }
 }
 
-/* === EVENTS === */
 btn.addEventListener("click", load);
 
 [nickInput, passwordInput].forEach(input => {
@@ -572,7 +569,6 @@ document.querySelectorAll(".tab").forEach(tab => {
   });
 });
 
-// Скрипт для цветных рамок, свечения и фонов (ваш оригинальный)
 setInterval(() => {
   document.querySelectorAll('.card').forEach(card => {
     const rarityText = card.querySelector('.rarity-text')?.textContent;
@@ -596,7 +592,7 @@ setInterval(() => {
         const rarityClass = key.toLowerCase();
         card.classList.add(rarityClass);
         
-        const isOwned = !card.querySelector('.no-img') || card.querySelector('.no-img')?.textContent !== '🔒 Изображение скрыто';
+        const isOwned = !card.querySelector('.no-img') || card.querySelector('.no-img')?.textContent !== '🔒 Не в коллекции';
         if (isOwned) {
           card.classList.add('owned');
         }
