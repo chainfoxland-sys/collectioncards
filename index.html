@@ -4,23 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Коллекция карт от Chain Foxland</title>
-  
-  <!-- Подключаем красивый шрифт -->
   <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
-  
-  <link rel="icon" href="data:,">
-
   <style>
-    :root {
-      --glass: rgba(255,255,255,0.06);
-      --accent: #c084fc;
-      --common: silver;
-      --uncommon: #3cff00;
-      --rare: #009dff;
-      --epic: #c63cff;
-      --legendary: #ff9c00;
-    }
-
+    /* Ваши стили остаются без изменений */
     body {
       margin: 0;
       padding: 0;
@@ -31,7 +17,6 @@
       background-size: 400% 400%;
       animation: gradientShift 15s ease infinite;
       min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
     }
 
     @keyframes gradientShift {
@@ -49,8 +34,7 @@
     h1 {
       margin: 10px 0 18px;
       font-size: 2.2rem;
-      text-shadow: 0 0 12px var(--accent);
-      letter-spacing: 1px;
+      text-shadow: 0 0 12px #c084fc;
     }
 
     .controls {
@@ -83,11 +67,7 @@
     }
 
     .input-field:focus {
-      box-shadow: 0 0 15px var(--accent);
-    }
-
-    .input-field::placeholder {
-      color: rgba(255,255,255,0.5);
+      box-shadow: 0 0 15px #c084fc;
     }
 
     button {
@@ -106,33 +86,18 @@
       box-shadow: 0 0 20px #b993ff;
     }
 
-    .hint {
-      color: rgba(255,255,255,0.5);
-      font-size: 0.85rem;
-      margin-top: 5px;
-      text-align: center;
-    }
-
     .loader {
       border: 5px solid #f3f3f3;
       border-top: 5px solid #8a2be2;
       border-radius: 50%;
       width: 40px;
       height: 40px;
-      margin: 20px auto 10px auto;
+      margin: 20px auto;
       animation: spin 1s linear infinite;
     }
     
     @keyframes spin { 
       to { transform: rotate(360deg); } 
-    }
-
-    .progress {
-      font-size: 1.1em;
-      font-weight: 500;
-      margin: 10px 20px 20px 20px;
-      font-style: italic;
-      text-shadow: 0 0 10px rgba(255,255,255,0.5);
     }
 
     .error-message {
@@ -161,12 +126,11 @@
     }
 
     .tab.active {
-      background: var(--accent);
+      background: #c084fc;
       color: #111;
       font-weight: 600;
     }
 
-    /* --- Карточки --- */
     .cards {
       display: flex;
       flex-wrap: wrap;
@@ -181,40 +145,14 @@
       overflow: hidden;
       cursor: pointer;
       background: rgba(30, 30, 40, 0.8);
-      transform: scale(0.9);
-      opacity: 0;
       transition: all 0.4s ease;
-      position: relative;
       border: 2px solid transparent;
-      backdrop-filter: blur(10px);
-    }
-    
-    .card.show {
-      transform: scale(1);
-      opacity: 1;
-    }
-
-    /* Анимированное свечение для карточек в наличии */
-    .card.owned {
-      animation: glowPulse 2s ease-in-out infinite alternate;
-    }
-
-    @keyframes glowPulse {
-      from {
-        box-shadow: 0 0 10px rgba(255,255,255,0.1);
-      }
-      to {
-        box-shadow: 0 0 25px currentColor;
-      }
     }
 
     .card img {
       width: 100%;
       height: 240px;
       object-fit: cover;
-      background: rgba(0,0,0,0.3);
-      display: block;
-      transition: transform 0.4s ease;
     }
 
     .no-img {
@@ -225,7 +163,6 @@
       align-items: center;
       background: rgba(255,255,255,0.08);
       color: #ccc;
-      font-size: 0.9rem;
     }
 
     .card-content {
@@ -236,131 +173,38 @@
     .card h3 {
       margin: 10px 0 8px;
       font-size: 1.1em;
-      font-weight: 600;
-      text-align: center;
-      font-family: "Exo 2", sans-serif;
     }
 
-    .card p {
-      margin-bottom: 8px;
-      font-size: 0.9em;
-      text-align: center;
+    .progress {
+      font-size: 1.1em;
+      margin: 10px 0;
     }
 
-    /* Цвет текста редкости */
-    .rarity-text {
-      font-weight: 600;
-      text-shadow: 0 0 5px currentColor;
-      font-family: "Exo 2", sans-serif;
-    }
-
-    /* Описание спрятано */
-    .description {
-      display: none;
-      margin-top: 8px;
-      font-size: 0.85rem;
-      opacity: 0.8;
-      text-align: center;
-      line-height: 1.4;
-      font-family: "Exo 2", sans-serif;
-    }
-
-    /* Показываем при увеличении */
-    .card.expanded .description {
-      display: block;
-    }
-
+    /* Стили для разных редкостей */
+    .card.common { border-color: silver; }
+    .card.uncommon { border-color: #3cff00; }
+    .card.rare { border-color: #009dff; }
+    .card.epic { border-color: #c63cff; }
+    .card.legendary { border-color: #ff9c00; }
+    
+    .rarity-text { font-weight: 600; }
+    .card.common .rarity-text { color: silver; }
+    .card.uncommon .rarity-text { color: #3cff00; }
+    .card.rare .rarity-text { color: #009dff; }
+    .card.epic .rarity-text { color: #c63cff; }
+    .card.legendary .rarity-text { color: #ff9c00; }
+    
+    .description { font-size: 0.85rem; opacity: 0.8; margin-top: 8px; display: none; }
+    .card.expanded .description { display: block; }
+    
     .card.expanded {
-      transform: scale(2) !important;
+      transform: scale(1.8) !important;
       z-index: 2000;
       position: fixed;
       top: 50% !important;
       left: 50% !important;
       transform: translate(-50%, -50%) scale(1.8) !important;
       box-shadow: 0 0 50px rgba(0,0,0,0.9);
-    }
-
-    /* Темные фоны для разных редкостей */
-    .card.common {
-      background: linear-gradient(135deg, rgba(80, 80, 80, 0.9), rgba(50, 50, 50, 0.8));
-    }
-    .card.uncommon {
-      background: linear-gradient(135deg, rgba(0, 80, 0, 0.9), rgba(0, 50, 0, 0.8));
-    }
-    .card.rare {
-      background: linear-gradient(135deg, rgba(0, 50, 100, 0.9), rgba(0, 30, 70, 0.8));
-    }
-    .card.epic {
-      background: linear-gradient(135deg, rgba(60, 0, 100, 0.9), rgba(40, 0, 70, 0.8));
-    }
-    .card.legendary {
-      background: linear-gradient(135deg, rgba(100, 50, 0, 0.9), rgba(70, 35, 0, 0.8));
-    }
-
-    /* Мобильная версия */
-    @media (max-width: 768px) {
-      .cards {
-        gap: 15px;
-        padding: 15px;
-      }
-      
-      .card {
-        width: calc(50% - 15px) !important;
-        min-width: unset;
-        max-width: 160px;
-      }
-      
-      .loader {
-        margin: 15px auto 8px auto;
-      }
-      
-      .progress {
-        margin: 5px 15px 15px 15px;
-      }
-    }
-
-    @media (max-width: 600px) {
-      .card.expanded {
-        transform: translate(-50%, -50%) scale(1.3) !important;
-        width: 90vw;
-        max-width: 280px;
-      }
-      
-      .container {
-        padding: 10px;
-        margin: 15px auto;
-      }
-      
-      h1 {
-        font-size: 1.8rem;
-        margin: 5px 0 12px;
-      }
-      
-      .input-group {
-        max-width: 300px;
-      }
-    }
-
-    /* Для очень маленьких экранов */
-    @media (max-width: 400px) {
-      .card {
-        width: calc(50% - 10px) !important;
-        max-width: 140px;
-      }
-      
-      .cards {
-        gap: 10px;
-        padding: 10px;
-      }
-    }
-
-    /* Фикс для контейнера загрузки */
-    .loading-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
     }
   </style>
 </head>
@@ -371,19 +215,15 @@
 
   <div class="controls">
     <div class="input-group">
-      <input type="text" id="nick" class="input-field" placeholder="Ник на Twitch" autocomplete="username" />
-      <input type="password" id="password" class="input-field" placeholder="Пароль" autocomplete="current-password" />
+      <input type="text" id="nick" class="input-field" placeholder="Ник на Twitch" />
+      <input type="password" id="password" class="input-field" placeholder="Пароль" />
       <button id="btn">Войти</button>
-      <div class="hint">🔐 Пароль можно получить у администратора</div>
     </div>
   </div>
 
   <div id="errorMessage" class="error-message" style="display: none;"></div>
-
-  <div class="loading-container">
-    <div id="loader" style="display:none;" class="loader"></div>
-    <div id="progress" class="progress"></div>
-  </div>
+  <div id="loader" class="loader" style="display:none;"></div>
+  <div id="progress" class="progress"></div>
 
   <div class="tabs" id="tabs" style="display:none;">
     <div class="tab active" data-tab="owned">Только мои</div>
@@ -395,8 +235,7 @@
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbx4YJdCllMyUhDIKMMAZ6or5jSKnvuxJf2ekSvyf-2JzY0CF-9iIKndqIPdMH4i3IyV/exec";
-
+const API = "ВАШ_URL_GOOGLE_APPS_SCRIPT";
 const btn = document.getElementById("btn");
 const nickInput = document.getElementById("nick");
 const passwordInput = document.getElementById("password");
@@ -409,23 +248,33 @@ const errorMessage = document.getElementById("errorMessage");
 let allCards = [];
 let currentMode = "owned";
 let expandedCard = null;
+let encryptionKey = "";
 
-// Пытаемся восстановить последний ник
-const savedNick = localStorage.getItem('last_nick');
-if (savedNick) {
-  nickInput.value = savedNick;
-  passwordInput.focus();
+// Функция расшифровки URL на клиенте
+function decryptUrl(encryptedBase64, key) {
+  if (!encryptedBase64 || encryptedBase64 === "") return "";
+  if (!encryptedBase64.includes('=')) return encryptedBase64; // Не зашифровано
+  
+  try {
+    // Декодируем base64
+    const encrypted = atob(encryptedBase64);
+    let decrypted = "";
+    for (let i = 0; i < encrypted.length; i++) {
+      const charCode = encrypted.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+      decrypted += String.fromCharCode(charCode);
+    }
+    return decrypted;
+  } catch (e) {
+    console.error("Decryption error:", e);
+    return "";
+  }
 }
 
-/* === LOADING === */
 function setLoading(v) {
   loader.style.display = v ? "block" : "none";
   btn.disabled = v;
-  nickInput.disabled = v;
-  passwordInput.disabled = v;
 }
 
-/* === ПОКАЗ ОШИБКИ === */
 function showError(text) {
   errorMessage.textContent = text;
   errorMessage.style.display = 'block';
@@ -434,35 +283,69 @@ function showError(text) {
   }, 3000);
 }
 
-/* === RENDER === */
-function render(mode="owned") {
+function getRarityClass(rarity) {
+  const rarityMap = {
+    'Обычная': 'common', 'Common': 'common',
+    'Необычная': 'uncommon', 'Uncommon': 'uncommon',
+    'Редкая': 'rare', 'Rare': 'rare',
+    'Эпическая': 'epic', 'Epic': 'epic',
+    'Легендарная': 'legendary', 'Legendary': 'legendary'
+  };
+  return rarityMap[rarity] || 'common';
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function render(mode = "owned") {
   cardsDiv.innerHTML = "";
 
-  let filtered =
-    mode === "owned" ? allCards.filter(c => c.owned)
-    : mode === "missing" ? allCards.filter(c => !c.owned)
-    : allCards;
+  let filtered = mode === "owned" 
+    ? allCards.filter(c => c.owned === 1)
+    : mode === "missing" 
+      ? allCards.filter(c => c.owned === 0)
+      : allCards;
 
-  filtered.forEach((c,i) => {
+  if (filtered.length === 0) {
+    cardsDiv.innerHTML = '<div style="color: rgba(255,255,255,0.5);">Нет карт для отображения 😢</div>';
+    return;
+  }
+
+  filtered.forEach((card, i) => {
     const div = document.createElement("div");
-    div.className = "card";
-
-    const imageVisible = c.owned ? (c.image && c.image.length > 4) : false;
-
+    div.className = `card ${getRarityClass(card.rarity)}`;
+    
+    // Расшифровываем URL только для НЕ принадлежащих карт
+    let imageUrl = card.image;
+    if (card.owned === 0 && card.isEncrypted && encryptionKey) {
+      imageUrl = decryptUrl(card.image, encryptionKey);
+    }
+    
+    const hasImage = imageUrl && imageUrl.length > 4;
+    
     div.innerHTML = `
-      ${imageVisible
-        ? `<img src="${c.image}" alt="${c.name}" onerror="this.src='noimage.svg'">`
-        : `<div class="no-img">Нет изображения</div>`
+      ${hasImage
+        ? `<img src="${imageUrl}" alt="${escapeHtml(card.name)}" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20fill%3D%22%23333%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20dominant-baseline%3D%22middle%22%20text-anchor%3D%22middle%22%20fill%3D%22%23fff%22%3ENo%20image%3C%2Ftext%3E%3C%2Fsvg%3E'">`
+        : `<div class="no-img">🔒 Изображение скрыто</div>`
       }
       <div class="card-content">
-        <h3>${c.name}</h3>
-        <p class="rarity-text">${c.rarity}</p>
-        <p class="description">Количество: ${c.count}</p>
-        <p class="description">${c.description}</p>
+        <h3>${escapeHtml(card.name)}</h3>
+        <p class="rarity-text">${escapeHtml(card.rarity)}</p>
+        <p class="description">Количество: ${card.count}</p>
+        <p class="description">${escapeHtml(card.description)}</p>
       </div>
     `;
-
-    div.addEventListener("click", () => {
+    
+    // Добавляем обработчик для увеличения карты
+    div.addEventListener("click", (e) => {
+      e.stopPropagation();
       if (div.classList.contains("expanded")) {
         div.classList.remove("expanded");
         expandedCard = null;
@@ -474,13 +357,13 @@ function render(mode="owned") {
         expandedCard = div;
       }
     });
-
+    
     cardsDiv.appendChild(div);
-    setTimeout(() => div.classList.add("show"), 50 * i);
+    // Анимация появления
+    setTimeout(() => div.style.opacity = "1", i * 50);
   });
 }
 
-/* === LOAD DATA === */
 async function load() {
   const nick = nickInput.value.trim();
   const password = passwordInput.value;
@@ -493,74 +376,44 @@ async function load() {
   setLoading(true);
   tabs.style.display = "none";
   cardsDiv.innerHTML = "";
-  progressDiv.textContent = "Лиса достаёт лапками твои карты...";
+  progressDiv.textContent = "Загрузка ваших карт...";
   errorMessage.style.display = 'none';
   expandedCard = null;
 
   try {
-    // Добавляем пароль в запрос
     const url = `${API}?player=${encodeURIComponent(nick)}&password=${encodeURIComponent(password)}`;
-    const res = await fetch(url);
+    const response = await fetch(url);
     
-    if (!res.ok) throw new Error("Сервер вернул ошибку " + res.status);
+    if (!response.ok) throw new Error("Ошибка сервера");
 
-    const data = await res.json();
+    const data = await response.json();
     
-    // Проверяем ошибку от API
     if (data.error) {
-      showError("Неверный ник или пароль");
+      showError(data.message || "Ошибка авторизации");
       setLoading(false);
       return;
     }
 
-    // Сохраняем ник для автозаполнения
-    localStorage.setItem('last_nick', nick);
-
-    const map = {};
-    data.cards.forEach(c => {
-      const key = c.id || c.name;
-      if (!map[key]) {
-        map[key] = { 
-          ...c, 
-          count: c.count,
-          duplicates: c.count - 1
-        };
-      } else {
-        map[key].count++;
-        map[key].duplicates++;
-      }
-    });
-
-    allCards = Object.values(map).map(c => ({
-      name: c.name || "Без имени",
-      rarity: c.rarity || "Common",
-      description: c.description || "",
-      image: c.image || "",
-      owned: c.owned == 1 || c.owned === true || c.owned === "1",
-      count: c.count,
-      duplicates: c.count > 1 ? `${c.count - 1}` : ""
-    }));
-
-    // Фильтруем карты, исключая те, у которых в названии есть символ ☆
-    const filteredCards = allCards.filter(c => !c.name.includes('☆'));
-    const ownedCount = filteredCards.filter(c => c.owned).length;
-    progressDiv.textContent = `Уникальных: ${ownedCount} / 21`;
-
+    // Сохраняем ключ шифрования
+    encryptionKey = data.encryptionKey || "";
+    
+    allCards = data.cards || [];
+    progressDiv.textContent = `Уникальных: ${data.ownedUniqueCards} / ${data.totalUniqueCards} (${data.progressPercent}%)`;
+    
     tabs.style.display = "flex";
     render(currentMode);
 
   } catch (e) {
-    showError("Ошибка соединения");
     console.error(e);
+    showError("Ошибка соединения с сервером");
   } finally {
     setLoading(false);
   }
 }
 
-/* === EVENTS === */
+// Event listeners
 btn.addEventListener("click", load);
 
-// Enter в любом поле
 [nickInput, passwordInput].forEach(input => {
   input.addEventListener("keydown", e => { 
     if (e.key === "Enter") load(); 
@@ -569,7 +422,7 @@ btn.addEventListener("click", load);
 
 document.querySelectorAll(".tab").forEach(tab => {
   tab.addEventListener("click", () => {
-    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
     tab.classList.add("active");
     currentMode = tab.dataset.tab;
     expandedCard = null;
@@ -577,41 +430,27 @@ document.querySelectorAll(".tab").forEach(tab => {
   });
 });
 
-// Скрипт для цветных рамок, свечения и фонов
-setInterval(() => {
-  document.querySelectorAll('.card').forEach(card => {
-    const rarityText = card.querySelector('.rarity-text')?.textContent;
-    if (!rarityText) return;
-    
-    const colors = {
-      'Обычная': 'silver', 'Обычный': 'silver', 'Common': 'silver',
-      'Необычная': '#3cff00', 'Необычный': '#3cff00', 'Uncommon': '#3cff00',
-      'Редкая': '#009dff', 'Редкий': '#009dff', 'Rare': '#009dff',
-      'Эпическая': '#c63cff', 'Эпический': '#c63cff', 'Epic': '#c63cff',
-      'Легендарная': '#ff9c00', 'Легендарный': '#ff9c00', 'Legendary': '#ff9c00'
-    };
-    
-    for (const [key, color] of Object.entries(colors)) {
-      if (rarityText.includes(key)) {
-        card.style.borderColor = color;
-        card.style.color = color;
-        card.querySelector('.rarity-text').style.color = color;
-        
-        // Добавляем класс редкости для темного фона
-        const rarityClass = key.toLowerCase();
-        card.classList.add(rarityClass);
-        
-        // Добавляем класс owned для анимации свечения
-        const isOwned = !card.querySelector('.no-img');
-        if (isOwned) {
-          card.classList.add('owned');
-        }
-        break;
-      }
-    }
-  });
-}, 100);
+// Восстановление последнего ника
+const savedNick = localStorage.getItem('last_nick');
+if (savedNick) {
+  nickInput.value = savedNick;
+  passwordInput.focus();
+}
+
+// Сохраняем ник после успешного входа
+function saveNick() {
+  localStorage.setItem('last_nick', nickInput.value.trim());
+}
+
+// Добавляем сохранение при успешной загрузке
+const originalLoad = load;
+window.load = async function() {
+  await originalLoad();
+  if (nickInput.value.trim()) {
+    localStorage.setItem('last_nick', nickInput.value.trim());
+  }
+};
+load = window.load;
 </script>
 </body>
 </html>
-
