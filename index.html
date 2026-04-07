@@ -395,7 +395,7 @@
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycby6viB0RjRfeo_LF9Mf5FSoEN7lk606_XUJI2Cv89NSFkY9GktI8H_ddsMn0iytpLqu/exec";
+const API = "https://script.google.com/macros/s/AKfycbx_AqN39ZN2iccPXi9HgyGrICJATsmVzGq8M9o-o9DHgMRXjdmt6sXkpWAeEuLGRUqv/exec";
 
 const btn = document.getElementById("btn");
 const nickInput = document.getElementById("nick");
@@ -411,10 +411,9 @@ let currentMode = "owned";
 let expandedCard = null;
 let encryptionKey = "";
 
-// Функция расшифровки URL на клиенте
+// Функция расшифровки URL (только для защиты)
 function decryptUrl(encryptedBase64, key) {
   if (!encryptedBase64 || encryptedBase64 === "") return "";
-  
   try {
     const encrypted = atob(encryptedBase64);
     let decrypted = "";
@@ -465,13 +464,13 @@ function render(mode="owned") {
     const div = document.createElement("div");
     div.className = "card";
 
-    // Расшифровываем URL только для чужих карт
+    // ТОЛЬКО ЗДЕСЬ ЗАЩИТА - расшифровываем URL для чужих карт
     let imageUrl = c.image;
     if (!c.owned && c.isEncrypted && encryptionKey) {
       imageUrl = decryptUrl(c.image, encryptionKey);
     }
     
-    const imageVisible = c.owned ? (imageUrl && imageUrl.length > 4) : (imageUrl && imageUrl.length > 4);
+    const imageVisible = c.owned ? (c.image && c.image.length > 4) : (imageUrl && imageUrl.length > 4);
 
     div.innerHTML = `
       ${imageVisible
@@ -535,10 +534,9 @@ async function load() {
       return;
     }
 
-    // Сохраняем ник для автозаполнения
     localStorage.setItem('last_nick', nick);
     
-    // Сохраняем ключ шифрования
+    // Сохраняем ключ для расшифровки
     encryptionKey = data.encryptionKey || "";
 
     allCards = data.cards || [];
@@ -558,7 +556,6 @@ async function load() {
 /* === EVENTS === */
 btn.addEventListener("click", load);
 
-// Enter в любом поле
 [nickInput, passwordInput].forEach(input => {
   input.addEventListener("keydown", e => { 
     if (e.key === "Enter") load(); 
@@ -575,7 +572,7 @@ document.querySelectorAll(".tab").forEach(tab => {
   });
 });
 
-// Скрипт для цветных рамок, свечения и фонов
+// Скрипт для цветных рамок, свечения и фонов (ваш оригинальный)
 setInterval(() => {
   document.querySelectorAll('.card').forEach(card => {
     const rarityText = card.querySelector('.rarity-text')?.textContent;
